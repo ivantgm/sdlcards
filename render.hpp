@@ -8,6 +8,12 @@
 
 using namespace std;
 
+class Render;
+
+typedef vector<Render*> Renders;
+typedef Renders::iterator RendersI;
+typedef Renders::reverse_iterator RendersRI;
+
 class Render {
 protected:
     SDL_Renderer* window_renderer;
@@ -126,6 +132,12 @@ public:
          const SDL_Color &color);
 public:
     void get_cell_rect(int col, int row, SDL_Rect &rect);
+    void add_retangle(int col, int row, const SDL_Color &color, bool fill);
+public:
+    void render(void);    
+    void set_x(int x);
+    void set_y(int y);
+    void move(int x, int y);    
 private:
     int cols;
     int rows;
@@ -135,8 +147,7 @@ private:
     int hline_size;
     int vpad;
     int hpad;
+    Renders renders;
 };
-
-
 
 #endif

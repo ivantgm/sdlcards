@@ -9,10 +9,6 @@
 
 using namespace std;
 
-typedef vector<Render*> Renders;
-typedef Renders::iterator RendersI;
-typedef Renders::reverse_iterator RendersRI;
-
 class App {
 public:
     App(const string& window_caption, int width, int heigth);

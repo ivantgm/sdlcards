@@ -6,13 +6,11 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     int w, h;
     SDL_RenderGetLogicalSize(window_renderer, &w, &h);
 
-
-
     //====================================================
     Grid *grid = 
     add_grid(
-        4,     /* cols */
-        4,     /* rows */
+        8,     /* cols */
+        8,     /* rows */
         64,     /* col size */
         32,     /* row size */
         4,      /* vertical line size */
@@ -26,6 +24,28 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
             0x00  /* alpha */
         }
     );
+
+    grid->add_retangle(
+        3, // col coord
+        3, // row coord
+        {255, 0, 255, 0}, // color
+        true
+    );
+
+    grid->add_retangle(
+        3, // col coord
+        1, // row coord
+        {255, 0, 0, 0}, // color
+        true
+    );
+
+    grid->add_retangle(
+        2, // col coord
+        3, // row coord
+        {255, 255, 0, 0}, // color
+        true
+    );
+
     //====================================================  
 
     

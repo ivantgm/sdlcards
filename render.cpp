@@ -374,3 +374,70 @@ void Grid::get_cell_rect(int col, int row, SDL_Rect &rect) {
     rect.w = col_size - (vpad*2) - vline_size;
     rect.h = row_size - (hpad*2) - hline_size;
 }
+
+//-----------------------------------------------------------------------------
+void Grid::add_retangle(int col, int row, const SDL_Color &color, bool fill) {
+    SDL_Rect rect;
+    get_cell_rect(col, row, rect);
+    Rectangle *p = new Rectangle(window_renderer, rect, color, fill);
+    renders.push_back(p);    
+}
+
+//-----------------------------------------------------------------------------
+void Grid::render(void) {
+    Rectangles::render();    
+    for (auto i : renders) {
+        i->render();    
+    }
+}
+
+//-----------------------------------------------------------------------------
+void Grid::set_x(int x) {
+
+    Rectangles::set_x(x); 
+
+    int m = numeric_limits<int>::max();
+    for (auto& rect : rects) {
+        m = min(m, rect.x);
+    }     
+
+    for (auto i : renders) {
+        Rectangle *r = dynamic_cast<Rectangle*>(i);
+        if(r) {
+            r->move(x-m, 0);
+        }        
+    }    
+}
+
+//-----------------------------------------------------------------------------
+void Grid::set_y(int y) {
+
+    Rectangles::set_y(y); 
+
+    int m = numeric_limits<int>::max();
+    for (auto& rect : rects) {
+        m = min(m, rect.y);
+    }     
+
+    for (auto i : renders) {
+        Rectangle *r = dynamic_cast<Rectangle*>(i);
+        if(r) {
+            r->move(0, y-m);
+        }
+    }    
+}
+
+//-----------------------------------------------------------------------------
+void Grid::move(int x, int y) {
+    Rectangles::move(x, y);
+
+
+    for (auto i : renders) {
+        Rectangle *r = dynamic_cast<Rectangle*>(i);
+        r->rect.x += x;
+        r->rect.y += y;
+    }
+}
+
+
+
