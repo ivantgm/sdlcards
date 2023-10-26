@@ -130,9 +130,12 @@ public:
          int row_size, int vline_size, int hline_size,
          int vpad, int hpad,
          const SDL_Color &color);
+    ~Grid();
 public:
     void get_cell_rect(int col, int row, SDL_Rect &rect);
     void add_retangle(int col, int row, const SDL_Color &color, bool fill);
+    void add_texture(int col, int row, const string& file_name);
+
 public:
     void render(void);    
     void set_x(int x);
