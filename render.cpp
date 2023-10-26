@@ -363,7 +363,14 @@ Grid::Grid(SDL_Renderer* window_renderer,
         rects.push_back({0, i*row_size, cols*col_size+vline_size, hline_size});            
     }
           
-}          
+}  
+
+//-----------------------------------------------------------------------------        
+Grid::~Grid() {
+    for(RendersI i = renders.begin(); i != renders.end(); i++) {
+        delete (*i);                
+    }   
+}
 
 //-----------------------------------------------------------------------------
 void Grid::get_cell_rect(int col, int row, SDL_Rect &rect) { 
@@ -384,8 +391,19 @@ void Grid::add_retangle(int col, int row, const SDL_Color &color, bool fill) {
 }
 
 //-----------------------------------------------------------------------------
+void Grid::add_texture(int col, int row, const string& file_name) { 
+    SDL_Rect rect;
+    get_cell_rect(col, row, rect);    
+    Texture *p = new Texture(window_renderer, file_name, rect.x, rect.y);
+    renders.push_back(p);
+}    
+
+
+//-----------------------------------------------------------------------------
 void Grid::render(void) {
-    Rectangles::render();    
+
+    Rectangles::render();
+
     for (auto i : renders) {
         i->render();    
     }
@@ -402,11 +420,8 @@ void Grid::set_x(int x) {
     }     
 
     for (auto i : renders) {
-        Rectangle *r = dynamic_cast<Rectangle*>(i);
-        if(r) {
-            r->move(x-m, 0);
-        }        
-    }    
+        i->move(x-m, 0);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -420,22 +435,27 @@ void Grid::set_y(int y) {
     }     
 
     for (auto i : renders) {
-        Rectangle *r = dynamic_cast<Rectangle*>(i);
-        if(r) {
-            r->move(0, y-m);
-        }
+        i->move(0, y-m);
     }    
 }
 
 //-----------------------------------------------------------------------------
 void Grid::move(int x, int y) {
-    Rectangles::move(x, y);
 
+    Rectangles::move(x, y);
 
     for (auto i : renders) {
         Rectangle *r = dynamic_cast<Rectangle*>(i);
-        r->rect.x += x;
-        r->rect.y += y;
+        if(r) {
+            r->rect.x += x;
+            r->rect.y += y;
+        } else {
+            Texture *t = dynamic_cast<Texture*>(i);
+            if(t) {
+                t->rect.x += x;
+                t->rect.y += y;
+            }
+        }
     }
 }
 
