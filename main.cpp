@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED
 #include "cacheta.hpp"
 #include "exception.hpp"
 
