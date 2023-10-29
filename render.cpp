@@ -497,7 +497,8 @@ void Grid::add_retangle(int col, int row, const SDL_Color &color, bool fill) {
     SDL_Rect rect;
     get_cell_rect(col, row, rect);
     Rectangle *p = new Rectangle(window_renderer, rect, color, fill);
-    renders.push_back(p);    
+    renders.push_back(p);
+    map_renders[col][row] = p;
 }
 
 //-----------------------------------------------------------------------------
@@ -506,6 +507,7 @@ void Grid::add_texture(int col, int row, const string& file_name) {
     get_cell_rect(col, row, rect);    
     Texture *p = new Texture(window_renderer, file_name, rect.x, rect.y);
     renders.push_back(p);
+    map_renders[col][row] = p;
 }    
 
 
@@ -588,5 +590,22 @@ void Grid::get_rect(SDL_Rect &rect) {
     rect.y = min_y;
     rect.w = max_x - min_x;
     rect.h = max_y - min_y;
+}
+
+//-----------------------------------------------------------------------------
+Render *Grid::get_render(int col, int row) {
+    Render *result = map_renders[col][row];
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+Render *Grid::remove_render(int col, int row) {
+    Render *result = get_render(col, row);
+    map_renders[col][row] = NULL;
+    RendersI position = find(renders.begin(), renders.end(), result);
+    if(position != renders.end())  {
+        renders.erase(position);
+    }
+    return result;
 }
 
