@@ -14,6 +14,8 @@ typedef vector<Render*> Renders;
 typedef Renders::iterator RendersI;
 typedef Renders::reverse_iterator RendersRI;
 
+void inflate_rect(SDL_Rect &rect, int amount);
+
 class Render {
 protected:
     SDL_Renderer* window_renderer;
@@ -26,7 +28,9 @@ public:
     virtual void set_x(int x) = 0;
     virtual void set_y(int y) = 0;
     virtual void move(int x, int y) = 0;
+    virtual void get_rect(SDL_Rect &rect) = 0;
     void set_xy(int x, int y);
+    void get_inflate_rect(SDL_Rect &rect, int amount);    
 };
 
 class Texture : public Render {
@@ -39,6 +43,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);
+    void get_rect(SDL_Rect &rect);
 private:
     SDL_Texture* texture;    
 };
@@ -52,7 +57,8 @@ public:
     void render(void);
     void set_x(int x);
     void set_y(int y);
-    void move(int x, int y);    
+    void move(int x, int y); 
+    void get_rect(SDL_Rect &rect);   
 private:
     bool fill;    
 };
@@ -67,6 +73,7 @@ public:
     void set_y(int y);
     void move(int x, int y);
     void get_xy(int &x, int &y);
+    void get_rect(SDL_Rect &rect);
 protected:
     vector<SDL_Rect>rects;
 private:
@@ -82,7 +89,8 @@ public:
     void render(void);
     void set_x(int x);
     void set_y(int y);
-    void move(int x, int y);        
+    void move(int x, int y);
+    void get_rect(SDL_Rect &rect);        
 };
 
 class Lines : public Render {
@@ -93,7 +101,8 @@ public:
     void render(void);
     void set_x(int x);
     void set_y(int y);
-    void move(int x, int y);       
+    void move(int x, int y);
+    void get_rect(SDL_Rect &rect);       
 private:
     vector<SDL_Point> points;
 };
@@ -107,7 +116,8 @@ public:
     void render(void); 
     void set_x(int x);
     void set_y(int y);
-    void move(int x, int y);         
+    void move(int x, int y);
+    void get_rect(SDL_Rect &rect);         
 };
 
 class Points : public Render {
@@ -118,7 +128,8 @@ public:
     void render(void);
     void set_x(int x);
     void set_y(int y);
-    void move(int x, int y);       
+    void move(int x, int y);
+    void get_rect(SDL_Rect &rect);      
 private:
     vector<SDL_Point>points;    
 };
@@ -140,7 +151,8 @@ public:
     void render(void);    
     void set_x(int x);
     void set_y(int y);
-    void move(int x, int y);    
+    void move(int x, int y);  
+    void get_rect(SDL_Rect &rect);  
 private:
     int cols;
     int rows;

@@ -6,6 +6,8 @@
 //-----------------------------------------------------------------------------
 App::App(const string& window_caption, int width, int heigth) {
     window = NULL;
+    this->width = width;
+    this->heigth = heigth;    
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
         throw Exception("SDL não inicializou", SDL_GetError());            
     } 
@@ -121,6 +123,7 @@ void App::add_points(const vector<SDL_Point> &points, const SDL_Color &color) {
     Points *p = new Points(window_renderer, points, color);
     renders.push_back(p);
 }
+
 //-----------------------------------------------------------------------------
 Grid *App::add_grid(int cols, int rows, int col_size, 
                    int row_size, int vline_size, int hline_size, 
@@ -142,3 +145,13 @@ Grid *App::add_grid(int cols, int rows, int col_size,
     return p;
 
 }
+
+//-----------------------------------------------------------------------------
+void App::screen_shot(void) {
+    // https://stackoverflow.com/questions/22315980/sdl2-c-taking-a-screenshot
+    SDL_Surface *ss = SDL_CreateRGBSurface(0, width, heigth, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    SDL_RenderReadPixels(window_renderer, NULL, SDL_PIXELFORMAT_ARGB8888, ss->pixels, ss->pitch);
+    SDL_SaveBMP(ss, "screenshots/screenshot.bmp");
+    SDL_FreeSurface(ss);
+}
+
