@@ -16,6 +16,7 @@ public:
 public:    
     void loop(void);
     virtual void poll_event(SDL_Event *e);
+    void screen_shot(void);
 protected:
     SDL_Renderer* window_renderer;
     Renders renders;    
@@ -34,11 +35,13 @@ protected:
             const SDL_Color &color
         );
 private:
-    SDL_Window* window;    
+    SDL_Window* window; 
+    int width;
+    int heigth;
 private:
     void render_renders(void);
     void delete_renders(void);
-    void render(void);
+    void render(void);    
 };
 
 #endif

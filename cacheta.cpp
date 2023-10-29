@@ -4,7 +4,7 @@
 Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
 
     int w, h;
-    SDL_RenderGetLogicalSize(window_renderer, &w, &h);
+    SDL_RenderGetLogicalSize(window_renderer, &w, &h);   
 
     //====================================================
     Grid *grid = 
@@ -13,10 +13,10 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
         8,     /* rows */
         16,     /* col size */
         32,     /* row size */
-        4,      /* vertical line size */
-        3,      /* horizontal line size */
+        1,      /* vertical line size */
+        1,      /* horizontal line size */
         3,      /* vertical padding */
-        4,      /* horizontal padding */
+        3,      /* horizontal padding */
         {
             0x44, /* red */
             0x44, /* green */
@@ -47,7 +47,7 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     grid->add_retangle( 8, 1, {0xFF, 0x00, 0x00, 0x00}, true);
     grid->add_retangle( 9, 1, {0xFF, 0xFF, 0x00, 0x00}, true);
     grid->add_retangle(10, 1, {0xFF, 0x00, 0xFF, 0x00}, true);
-    grid->add_retangle( 9, 2, {0x00, 0xFF, 0xFF, 0x00}, false); 
+    grid->add_retangle( 9, 2, {0x00, 0xFF, 0xFF, 0x00}, false);
 
     //====================================================     
 
@@ -65,10 +65,18 @@ void Cacheta::poll_event(SDL_Event *e) {
             if(e->key.keysym.sym == SDLK_ESCAPE) {
                e->type = SDL_QUIT; 
             }
+            if(e->key.keysym.sym == SDLK_p) {
+               screen_shot(); 
+            }
             break;
         }
         case SDL_MOUSEBUTTONDOWN: {
-
+            // ao clicar com o mouse, pego o grid (primeiro elemento)
+            // e adiciono um rectangulo 2 pixels maior em todas as direções
+            RendersI i = renders.begin();
+            SDL_Rect grid_rect;           
+            (*i)->get_inflate_rect(grid_rect, 2);                        
+            add_rectangle(grid_rect, {0xFF, 0x00, 0x00, 0x00}, false);
             break;
         }
         case SDL_MOUSEWHEEL: {

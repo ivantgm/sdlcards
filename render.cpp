@@ -6,6 +6,13 @@
 
 using namespace std;
 
+void inflate_rect(SDL_Rect &rect, int amount) {
+    rect.x -= amount;
+    rect.y -= amount;
+    rect.w += (amount*2);
+    rect.h += (amount*2);
+}
+
 //-----------------------------------------------------------------------------
 //- Render --------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -17,10 +24,17 @@ Render::Render(SDL_Renderer* window_renderer) {
 Render::~Render() {
 
 }
+
 //-----------------------------------------------------------------------------
 void Render::set_xy(int x, int y) {
     set_x(x);
     set_y(y);
+}
+
+//-----------------------------------------------------------------------------
+void Render::get_inflate_rect(SDL_Rect &rect, int amount) {
+    get_rect(rect);
+    inflate_rect(rect, amount);
 }
 
 //-----------------------------------------------------------------------------
@@ -69,6 +83,14 @@ void Texture::move(int x, int y) {
 }
 
 //-----------------------------------------------------------------------------
+void Texture::get_rect(SDL_Rect &rect) {
+    rect.x = this->rect.x;
+    rect.y = this->rect.y;
+    rect.w = this->rect.w;
+    rect.h = this->rect.h;
+}
+
+//-----------------------------------------------------------------------------
 //- Rectangle -----------------------------------------------------------------
 //-----------------------------------------------------------------------------
 Rectangle::Rectangle(SDL_Renderer* window_renderer, const SDL_Rect &rect, const SDL_Color &color, bool fill) 
@@ -111,6 +133,15 @@ void Rectangle::move(int x, int y) {
 }
 
 //-----------------------------------------------------------------------------
+void Rectangle::get_rect(SDL_Rect &rect) {
+    rect.x = this->rect.x;
+    rect.y = this->rect.y;
+    rect.w = this->rect.w;
+    rect.h = this->rect.h;
+}
+
+
+//-----------------------------------------------------------------------------
 //- Line ----------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 Line::Line(SDL_Renderer* window_renderer, const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color) 
@@ -147,6 +178,14 @@ void Line::move(int x, int y) {
     point1.y += y;
     point2.x += x;
     point2.y += y;
+}
+
+//-----------------------------------------------------------------------------
+void Line::get_rect(SDL_Rect &rect) {
+    rect.x = this->point1.x;
+    rect.y = this->point1.y;
+    rect.w = this->point2.x - this->point1.x + 1;
+    rect.h = this->point2.y - this->point1.y + 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -195,6 +234,27 @@ void Lines::move(int x, int y) {
     }
 }
 
+//-----------------------------------------------------------------------------
+void Lines::get_rect(SDL_Rect &rect) {
+
+    int min_x = numeric_limits<int>::max();
+    int min_y = numeric_limits<int>::max();
+    int max_x = numeric_limits<int>::min();
+    int max_y = numeric_limits<int>::min();
+
+    for (auto& point : points) {
+        min_x = min(min_x, point.x);
+        min_y = min(min_y, point.y);
+        max_x = max(max_x, point.x);
+        max_y = max(max_y, point.y);
+    }    
+
+    rect.x = min_x;
+    rect.y = min_y;
+    rect.w = max_x - min_x + 1;
+    rect.h = max_y - min_y + 1;
+}
+
 
 //-----------------------------------------------------------------------------
 //- Point ---------------------------------------------------------------------
@@ -229,6 +289,14 @@ void Point::set_y(int y) {
 void Point::move(int x, int y) {
     point.x += x;
     point.y += y;
+}
+
+//-----------------------------------------------------------------------------
+void Point::get_rect(SDL_Rect &rect) {
+    rect.x = point.x;
+    rect.y = point.y;
+    rect.w = 1;
+    rect.h = 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -279,15 +347,36 @@ void Rectangles::move(int x, int y) {
         rect.y += y;
     }
 }
+
+//-----------------------------------------------------------------------------
 void Rectangles::get_xy(int &x, int &y) {
     x = numeric_limits<int>::max();
-    for (auto& rect : rects) {
-        x = min(x, rect.x);
-    } 
     y = numeric_limits<int>::max();
     for (auto& rect : rects) {
-        y = min(y, rect.y);
-    }       
+        x = min(x, rect.x);
+        y = min(y, rect.y);    
+    } 
+}
+
+//-----------------------------------------------------------------------------
+void Rectangles::get_rect(SDL_Rect &rect) {
+
+    int min_x = numeric_limits<int>::max();
+    int min_y = numeric_limits<int>::max();
+    int max_x = numeric_limits<int>::min();
+    int max_y = numeric_limits<int>::min();
+
+    for (auto& rect : rects) {
+        min_x = min(min_x, rect.x);
+        min_y = min(min_y, rect.y);  
+        max_x = max(max_x, rect.x + rect.w);
+        max_y = max(max_y, rect.y + rect.y);
+    } 
+
+    rect.x = min_x;
+    rect.y = min_y;
+    rect.w = max_x - min_x;
+    rect.h = max_y - min_y;
 }
 
 //-----------------------------------------------------------------------------
@@ -334,6 +423,27 @@ void Points::move(int x, int y) {
         point.x += x;
         point.y += y;
     }
+}
+
+//-----------------------------------------------------------------------------
+void Points::get_rect(SDL_Rect &rect) {
+
+    int min_x = numeric_limits<int>::max();
+    int min_y = numeric_limits<int>::max();
+    int max_x = numeric_limits<int>::min();
+    int max_y = numeric_limits<int>::min();    
+
+    for (auto& point : points) {
+        min_x = min(min_x, point.x);
+        min_y = min(min_y, point.y);
+        max_x = max(max_x, point.x);
+        max_y = max(max_y, point.y);
+    }
+
+    rect.x = min_x;
+    rect.y = min_y;
+    rect.w = max_x - min_x + 1;
+    rect.h = max_y - min_y + 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -459,5 +569,24 @@ void Grid::move(int x, int y) {
     }
 }
 
+//-----------------------------------------------------------------------------
+void Grid::get_rect(SDL_Rect &rect) {
 
+    int min_x = numeric_limits<int>::max();
+    int min_y = numeric_limits<int>::max();
+    int max_x = numeric_limits<int>::min();
+    int max_y = numeric_limits<int>::min();    
+    
+    for (auto& rect : rects) {
+        min_x = min(min_x, rect.x);
+        min_y = min(min_y, rect.y);
+        max_x = max(max_x, rect.x + rect.w);
+        max_y = max(max_y, rect.y + rect.h);
+    }   
+
+    rect.x = min_x;
+    rect.y = min_y;
+    rect.w = max_x - min_x;
+    rect.h = max_y - min_y;
+}
 
