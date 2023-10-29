@@ -148,14 +148,13 @@ public:
     void add_retangle(int col, int row, const SDL_Color &color, bool fill);
     void add_texture(int col, int row, const string& file_name);
     Render *remove_render(int col, int row);
-
+    Render *get_render(int col, int row);
 public:
     void render(void);    
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);  
-    void get_rect(SDL_Rect &rect); 
-    Render *get_render(int col, int row); 
+    void get_rect(SDL_Rect &rect);    
 private:
     int cols;
     int rows;
