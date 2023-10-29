@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
@@ -146,13 +147,14 @@ public:
     void get_cell_rect(int col, int row, SDL_Rect &rect);
     void add_retangle(int col, int row, const SDL_Color &color, bool fill);
     void add_texture(int col, int row, const string& file_name);
-
+    Render *remove_render(int col, int row);
+    Render *get_render(int col, int row);
 public:
     void render(void);    
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);  
-    void get_rect(SDL_Rect &rect);  
+    void get_rect(SDL_Rect &rect);    
 private:
     int cols;
     int rows;
@@ -163,6 +165,7 @@ private:
     int vpad;
     int hpad;
     Renders renders;
+    map<int, map<int, Render*> > map_renders;
 };
 
 #endif

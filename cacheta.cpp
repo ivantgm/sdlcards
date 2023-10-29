@@ -68,15 +68,23 @@ void Cacheta::poll_event(SDL_Event *e) {
             if(e->key.keysym.sym == SDLK_p) {
                screen_shot(); 
             }
+            if(e->key.keysym.sym == SDLK_d) {
+                Grid *g = dynamic_cast<Grid*>(*(renders.begin()));
+                Render *r = g->remove_render(24, 2);
+                if(r) {
+                   delete r;
+                }               
+            }            
             break;
         }
         case SDL_MOUSEBUTTONDOWN: {
-            // ao clicar com o mouse, pego o grid (primeiro elemento)
-            // e adiciono um rectangulo 2 pixels maior em todas as direções
-            RendersI i = renders.begin();
-            SDL_Rect grid_rect;           
-            (*i)->get_inflate_rect(grid_rect, 2);                        
-            add_rectangle(grid_rect, {0xFF, 0x00, 0x00, 0x00}, false);
+            Grid *g = dynamic_cast<Grid*>(*(renders.begin()));
+            Render *r = g->get_render(25, 3);
+            if(r) {
+                SDL_Rect rect;           
+                r->get_inflate_rect(rect, 2);                        
+                add_rectangle(rect, {0xFF, 0x00, 0x00, 0x00}, false);
+            }
             break;
         }
         case SDL_MOUSEWHEEL: {
