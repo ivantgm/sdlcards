@@ -91,6 +91,21 @@ void Texture::get_rect(SDL_Rect &rect) {
 }
 
 //-----------------------------------------------------------------------------
+void Texture::set_blend(SDL_BlendMode mode) {
+    SDL_SetTextureBlendMode(texture, mode);
+}
+
+//-----------------------------------------------------------------------------
+void Texture::set_alpha(Uint8 alpha) {
+    SDL_SetTextureAlphaMod(texture, alpha);
+}
+
+//-----------------------------------------------------------------------------
+void Texture::set_color(Uint8 r, Uint8 g, Uint8 b) {
+    SDL_SetTextureColorMod(texture, r, g, b);
+}
+
+//-----------------------------------------------------------------------------
 //- Rectangle -----------------------------------------------------------------
 //-----------------------------------------------------------------------------
 Rectangle::Rectangle(SDL_Renderer* window_renderer, const SDL_Rect &rect, const SDL_Color &color, bool fill) 

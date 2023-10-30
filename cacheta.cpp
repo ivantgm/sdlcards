@@ -79,11 +79,27 @@ void Cacheta::poll_event(SDL_Event *e) {
         }
         case SDL_MOUSEBUTTONDOWN: {
             Grid *g = dynamic_cast<Grid*>(*(renders.begin()));
-            Render *r = g->get_render(25, 3);
-            if(r) {
-                SDL_Rect rect;           
-                r->get_inflate_rect(rect, 2);                        
-                add_rectangle(rect, {0xFF, 0x00, 0x00, 0x00}, false);
+            Render *r1 = g->get_render(25, 3);
+            Render *r2 = g->get_render(0, 7);
+            if(r1 && r2) {
+                Texture *t1 = dynamic_cast<Texture*>(r1);
+                Texture *t2 = dynamic_cast<Texture*>(r2);
+                if(t1 && t2) {
+                    static bool b = true;                    
+                    if(b) {
+                        t1->set_alpha(0xEE);
+                        t1->set_color(0xFF, 0xDD, 0xDD);
+
+                        t2->set_blend(SDL_BLENDMODE_MOD);
+
+                    } else {
+                        t1->set_alpha(0xFF);
+                        t1->set_color(0xFF, 0xFF, 0xFF);
+                        
+                        t2->set_blend(SDL_BLENDMODE_BLEND);
+                    }
+                    b = !b;
+                }
             }
             break;
         }
