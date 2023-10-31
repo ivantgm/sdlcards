@@ -45,6 +45,9 @@ public:
     void set_y(int y);
     void move(int x, int y);
     void get_rect(SDL_Rect &rect);
+    void set_blend(SDL_BlendMode mode);
+    void set_alpha(Uint8 alpha);
+    void set_color(Uint8 r, Uint8 g, Uint8 b);
 private:
     SDL_Texture* texture;    
 };
