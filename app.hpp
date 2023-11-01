@@ -34,6 +34,7 @@ protected:
             int vpad, int hpad, 
             const SDL_Color &color
         );
+    Render *get_render_at(int x, int y);
 private:
     SDL_Window* window; 
     int width;

@@ -155,3 +155,18 @@ void App::screen_shot(void) {
     SDL_FreeSurface(ss);
 }
 
+//-----------------------------------------------------------------------------
+Render *App::get_render_at(int x, int y) {
+    for(auto r : renders) {
+        const Renders &rs = r->get_renders();
+        for (RendersCRI i = rs.rbegin(); i != rs.rend(); i++) {
+            if((*i)->rect_contains(x, y)) {
+                return *i;
+            }
+        }
+        if(r->rect_contains(x, y)) {
+            return r;
+        }        
+    }
+    return NULL;
+}

@@ -68,13 +68,24 @@ void Cacheta::poll_event(SDL_Event *e) {
             if(e->key.keysym.sym == SDLK_p) {
                screen_shot(); 
             }
-            if(e->key.keysym.sym == SDLK_d) {
-                Grid *g = dynamic_cast<Grid*>(*(renders.begin()));
-                Render *r = g->remove_render(24, 2);
-                if(r) {
-                   delete r;
-                }               
-            }            
+
+            // `renders.begin()`: o grid é o primeiro elemento
+            // `get_renders()`: pega o vector de renders do grid sem precisar de cast
+            // movimenta todos os elementos do grid usando um foreach
+            if(e->key.keysym.sym == SDLK_d) { /* down */                
+                const Renders &rs = (*(renders.begin()))->get_renders();
+                for (auto i : rs) {
+                    i->move(0, 8);    
+                }
+            }
+            if(e->key.keysym.sym == SDLK_u) { /* up */
+                const Renders &rs = (*(renders.begin()))->get_renders();
+                for (auto i : rs) {
+                    i->move(0, -8);    
+                }
+            }
+                
+         
             break;
         }
         case SDL_MOUSEBUTTONDOWN: {
@@ -108,15 +119,16 @@ void Cacheta::poll_event(SDL_Event *e) {
             break;
         }
         case SDL_MOUSEMOTION: {
-            if(!renders.empty()) {
-                
-                // movimenta o Grid
-                // ele é o primeiro elemento neste exemplo
 
-                RendersI i = renders.begin();                
-                (*i)->set_xy(e->motion.x, e->motion.y);
-
+            Render *r = get_render_at(e->motion.x, e->motion.y);
+            if(r) {
+                Texture *t = dynamic_cast<Texture*>(r);
+                if(t) {
+                    t->set_color(0xFF, 0xDD, 0xDD);    
+                }
             }
+        
+
             break;
         }
     }

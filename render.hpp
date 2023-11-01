@@ -14,12 +14,14 @@ class Render;
 typedef vector<Render*> Renders;
 typedef Renders::iterator RendersI;
 typedef Renders::reverse_iterator RendersRI;
+typedef Renders::const_reverse_iterator RendersCRI;
 
 void inflate_rect(SDL_Rect &rect, int amount);
 
 class Render {
 protected:
     SDL_Renderer* window_renderer;
+    Renders renders;
 public:
     Render(SDL_Renderer* window_renderer);
     virtual ~Render();
@@ -29,9 +31,11 @@ public:
     virtual void set_x(int x) = 0;
     virtual void set_y(int y) = 0;
     virtual void move(int x, int y) = 0;
-    virtual void get_rect(SDL_Rect &rect) = 0;
+    virtual void get_rect(SDL_Rect &rect) const = 0;
     void set_xy(int x, int y);
-    void get_inflate_rect(SDL_Rect &rect, int amount);    
+    void get_inflate_rect(SDL_Rect &rect, int amount) const;
+    const Renders& get_renders() const;
+    bool rect_contains(int x, int y) const;
 };
 
 class Texture : public Render {
@@ -44,7 +48,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);
-    void get_rect(SDL_Rect &rect);
+    void get_rect(SDL_Rect &rect) const;
     void set_blend(SDL_BlendMode mode);
     void set_alpha(Uint8 alpha);
     void set_color(Uint8 r, Uint8 g, Uint8 b);
@@ -62,7 +66,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y); 
-    void get_rect(SDL_Rect &rect);   
+    void get_rect(SDL_Rect &rect) const;   
 private:
     bool fill;    
 };
@@ -77,7 +81,7 @@ public:
     void set_y(int y);
     void move(int x, int y);
     void get_xy(int &x, int &y);
-    void get_rect(SDL_Rect &rect);
+    void get_rect(SDL_Rect &rect) const;
 protected:
     vector<SDL_Rect>rects;
 private:
@@ -94,7 +98,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);
-    void get_rect(SDL_Rect &rect);        
+    void get_rect(SDL_Rect &rect) const;        
 };
 
 class Lines : public Render {
@@ -106,7 +110,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);
-    void get_rect(SDL_Rect &rect);       
+    void get_rect(SDL_Rect &rect) const;       
 private:
     vector<SDL_Point> points;
 };
@@ -121,7 +125,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);
-    void get_rect(SDL_Rect &rect);         
+    void get_rect(SDL_Rect &rect) const;         
 };
 
 class Points : public Render {
@@ -133,7 +137,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);
-    void get_rect(SDL_Rect &rect);      
+    void get_rect(SDL_Rect &rect) const;
 private:
     vector<SDL_Point>points;    
 };
@@ -157,7 +161,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);  
-    void get_rect(SDL_Rect &rect);    
+    void get_rect(SDL_Rect &rect) const;    
 private:
     int cols;
     int rows;
@@ -166,8 +170,7 @@ private:
     int vline_size;
     int hline_size;
     int vpad;
-    int hpad;
-    Renders renders;
+    int hpad;    
     map<int, map<int, Render*> > map_renders;
 };
 
