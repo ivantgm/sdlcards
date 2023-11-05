@@ -58,7 +58,36 @@ void App::loop(void) {
 
 //-----------------------------------------------------------------------------
 void App::poll_event(SDL_Event *e) {
-
+    switch(e->type) {
+        case SDL_MOUSEMOTION: {            
+            static Render *last_render = NULL;
+            Render *r = get_render_at(e->motion.x, e->motion.y);            
+            if((r) && (last_render != r)) {
+                r->mouse_over();
+            }            
+            if((last_render) && (last_render != r)) {
+                last_render->mouse_leave();
+            }
+            last_render = r;
+            break;
+        }
+        case SDL_MOUSEBUTTONDOWN: {
+            switch(e->button.button) {
+                case SDL_BUTTON_LEFT: {
+                    Render *r = get_render_at(e->button.x, e->button.y);
+                    if(r) {
+                        if(e->button.clicks == 1) {
+                            r->mouse_click();
+                        } else if(e->button.clicks == 2) {
+                            r->mouse_dclick();
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -168,5 +197,5 @@ Render *App::get_render_at(int x, int y) {
             return r;
         }        
     }
-    return NULL;
+    return nullptr;
 }
