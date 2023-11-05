@@ -26,6 +26,7 @@ public:
     Render(SDL_Renderer* window_renderer);
     virtual ~Render();
 public:
+    Render *owner;
     SDL_Color color;
     virtual void render(void) = 0;
     virtual void set_x(int x) = 0;
@@ -36,6 +37,15 @@ public:
     void get_inflate_rect(SDL_Rect &rect, int amount) const;
     const Renders& get_renders() const;
     bool rect_contains(int x, int y) const;
+    void mouse_over(void);
+    void mouse_leave(void);
+    void mouse_click(void);
+    void mouse_dclick(void);
+public:
+    void (*on_mouse_over)(Render*);
+    void (*on_mouse_leave)(Render*);
+    void (*on_mouse_click)(Render*);
+    void (*on_mouse_dclick)(Render*);
 };
 
 class Texture : public Render {
@@ -80,7 +90,7 @@ public:
     void set_x(int x);
     void set_y(int y);
     void move(int x, int y);
-    void get_xy(int &x, int &y);
+    void get_xy(int &x, int &y) const;
     void get_rect(SDL_Rect &rect) const;
 protected:
     vector<SDL_Rect>rects;
@@ -151,10 +161,12 @@ public:
          const SDL_Color &color);
     ~Grid();
 public:
-    void get_cell_rect(int col, int row, SDL_Rect &rect);
+    void get_cell_rect(int col, int row, SDL_Rect &rect) const;
     void add_retangle(int col, int row, const SDL_Color &color, bool fill);
     void add_texture(int col, int row, const string& file_name);
     Render *remove_render(int col, int row);
+    Render *remove_render(Render *render);
+    bool get_render_cell(const Render *render, int &col, int &row) const;
     Render *get_render(int col, int row);
 public:
     void render(void);    

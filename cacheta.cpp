@@ -48,8 +48,36 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     grid->add_retangle( 9, 1, {0xFF, 0xFF, 0x00, 0x00}, true);
     grid->add_retangle(10, 1, {0xFF, 0x00, 0xFF, 0x00}, true);
     grid->add_retangle( 9, 2, {0x00, 0xFF, 0xFF, 0x00}, false);
+    //====================================================
 
-    //====================================================     
+    const Renders &rs = grid->get_renders();
+    for (auto i : rs) {
+        i->on_mouse_over = [](Render *r) {
+            Texture *t = dynamic_cast<Texture*>(r);
+            if(t) {
+                t->set_color(0xFF, 0xDD, 0xDD);                
+            }            
+        };
+        i->on_mouse_leave = [](Render *r) {
+            Texture *t = dynamic_cast<Texture*>(r);
+            if(t) {
+                t->set_color(0xFF, 0xFF, 0xFF);    
+            }            
+        };
+        i->on_mouse_click = [](Render *r) {
+            Texture *t = dynamic_cast<Texture*>(r);
+            if(t) {
+                t->set_color(0x77, 0x77, 0xFF);    
+            }            
+        };
+        i->on_mouse_dclick = [](Render *r) {
+            Grid *owner_grid = dynamic_cast<Grid*>(r->owner);
+            if(owner_grid) {
+                Render *rd = owner_grid->remove_render(r);
+                delete rd;
+            }
+        };
+    }
 
 }
 
@@ -68,67 +96,15 @@ void Cacheta::poll_event(SDL_Event *e) {
             if(e->key.keysym.sym == SDLK_p) {
                screen_shot(); 
             }
-
-            // `renders.begin()`: o grid é o primeiro elemento
-            // `get_renders()`: pega o vector de renders do grid sem precisar de cast
-            // movimenta todos os elementos do grid usando um foreach
-            if(e->key.keysym.sym == SDLK_d) { /* down */                
-                const Renders &rs = (*(renders.begin()))->get_renders();
-                for (auto i : rs) {
-                    i->move(0, 8);    
-                }
-            }
-            if(e->key.keysym.sym == SDLK_u) { /* up */
-                const Renders &rs = (*(renders.begin()))->get_renders();
-                for (auto i : rs) {
-                    i->move(0, -8);    
-                }
-            }
-                
-         
             break;
         }
         case SDL_MOUSEBUTTONDOWN: {
-            Grid *g = dynamic_cast<Grid*>(*(renders.begin()));
-            Render *r1 = g->get_render(25, 3);
-            Render *r2 = g->get_render(0, 7);
-            if(r1 && r2) {
-                Texture *t1 = dynamic_cast<Texture*>(r1);
-                Texture *t2 = dynamic_cast<Texture*>(r2);
-                if(t1 && t2) {
-                    static bool b = true;                    
-                    if(b) {
-                        t1->set_alpha(0xEE);
-                        t1->set_color(0xFF, 0xDD, 0xDD);
-
-                        t2->set_blend(SDL_BLENDMODE_MOD);
-
-                    } else {
-                        t1->set_alpha(0xFF);
-                        t1->set_color(0xFF, 0xFF, 0xFF);
-                        
-                        t2->set_blend(SDL_BLENDMODE_BLEND);
-                    }
-                    b = !b;
-                }
-            }
             break;
         }
         case SDL_MOUSEWHEEL: {
-
             break;
         }
         case SDL_MOUSEMOTION: {
-
-            Render *r = get_render_at(e->motion.x, e->motion.y);
-            if(r) {
-                Texture *t = dynamic_cast<Texture*>(r);
-                if(t) {
-                    t->set_color(0xFF, 0xDD, 0xDD);    
-                }
-            }
-        
-
             break;
         }
     }

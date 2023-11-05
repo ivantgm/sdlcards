@@ -17,12 +17,21 @@ void inflate_rect(SDL_Rect &rect, int amount) {
 //- Render --------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 Render::Render(SDL_Renderer* window_renderer) {
+    on_mouse_over = nullptr;
+    on_mouse_leave = nullptr;
+    on_mouse_click = nullptr;
+    on_mouse_dclick = nullptr;
+    owner = nullptr;
     this->window_renderer = window_renderer;
 }
 
 //-----------------------------------------------------------------------------
 Render::~Render() {
-
+    on_mouse_over = nullptr;
+    on_mouse_leave = nullptr;
+    on_mouse_click = nullptr;
+    on_mouse_dclick = nullptr;
+    owner = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -50,6 +59,35 @@ bool Render::rect_contains(int x, int y) const {
            (rect.y <= y) && 
            ((rect.x+rect.w) >= x) &&
            ((rect.y+rect.h) >= y);
+}
+
+//-----------------------------------------------------------------------------
+void Render::mouse_over(void) {
+    if(on_mouse_over) {
+        on_mouse_over(this);
+    }
+
+}
+
+//-----------------------------------------------------------------------------
+void Render::mouse_leave(void) {
+    if(on_mouse_leave) {
+        on_mouse_leave(this);    
+    }
+}
+
+//-----------------------------------------------------------------------------
+void Render::mouse_click(void) {
+    if(on_mouse_click) {
+        on_mouse_click(this);    
+    }
+}
+
+//-----------------------------------------------------------------------------
+void Render::mouse_dclick(void) {
+    if(on_mouse_dclick) {
+        on_mouse_dclick(this);    
+    }
 }
 
 
@@ -381,7 +419,7 @@ void Rectangles::move(int x, int y) {
 }
 
 //-----------------------------------------------------------------------------
-void Rectangles::get_xy(int &x, int &y) {
+void Rectangles::get_xy(int &x, int &y) const {
     x = numeric_limits<int>::max();
     y = numeric_limits<int>::max();
     for (auto& rect : rects) {
@@ -515,7 +553,7 @@ Grid::~Grid() {
 }
 
 //-----------------------------------------------------------------------------
-void Grid::get_cell_rect(int col, int row, SDL_Rect &rect) { 
+void Grid::get_cell_rect(int col, int row, SDL_Rect &rect) const { 
     int x, y;
     get_xy(x, y);
     rect.x = ((col_size * col) + vpad + vline_size) + x;
@@ -531,6 +569,7 @@ void Grid::add_retangle(int col, int row, const SDL_Color &color, bool fill) {
     Rectangle *p = new Rectangle(window_renderer, rect, color, fill);
     renders.push_back(p);
     map_renders[col][row] = p;
+    p->owner = this;
 }
 
 //-----------------------------------------------------------------------------
@@ -540,6 +579,7 @@ void Grid::add_texture(int col, int row, const string& file_name) {
     Texture *p = new Texture(window_renderer, file_name, rect.x, rect.y);
     renders.push_back(p);
     map_renders[col][row] = p;
+    p->owner = this;
 }    
 
 
@@ -639,5 +679,26 @@ Render *Grid::remove_render(int col, int row) {
         renders.erase(position);
     }
     return result;
+}
+
+//-----------------------------------------------------------------------------
+Render *Grid::remove_render(Render *render) {
+    int col, row;
+    get_render_cell(render, col, row);
+    remove_render(col, row);
+}
+
+//-----------------------------------------------------------------------------
+bool Grid::get_render_cell(const Render *render, int &col, int &row) const {
+    for (auto &i : map_renders) {
+        for (auto j: i.second) {
+            if(j.second == render) {
+                col = i.first;
+                row = j.first;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
