@@ -563,23 +563,25 @@ void Grid::get_cell_rect(int col, int row, SDL_Rect &rect) const {
 }
 
 //-----------------------------------------------------------------------------
-void Grid::add_retangle(int col, int row, const SDL_Color &color, bool fill) {
+Rectangle *Grid::add_retangle(int col, int row, const SDL_Color &color, bool fill) {
     SDL_Rect rect;
     get_cell_rect(col, row, rect);
     Rectangle *p = new Rectangle(window_renderer, rect, color, fill);
     renders.push_back(p);
     map_renders[col][row] = p;
     p->owner = this;
+    return p;
 }
 
 //-----------------------------------------------------------------------------
-void Grid::add_texture(int col, int row, const string& file_name) { 
+Texture *Grid::add_texture(int col, int row, const string& file_name) { 
     SDL_Rect rect;
     get_cell_rect(col, row, rect);    
     Texture *p = new Texture(window_renderer, file_name, rect.x, rect.y);
     renders.push_back(p);
     map_renders[col][row] = p;
     p->owner = this;
+    return p;
 }    
 
 

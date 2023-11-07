@@ -162,8 +162,8 @@ public:
     ~Grid();
 public:
     void get_cell_rect(int col, int row, SDL_Rect &rect) const;
-    void add_retangle(int col, int row, const SDL_Color &color, bool fill);
-    void add_texture(int col, int row, const string& file_name);
+    Rectangle *add_retangle(int col, int row, const SDL_Color &color, bool fill);
+    Texture *add_texture(int col, int row, const string& file_name);
     Render *remove_render(int col, int row);
     Render *remove_render(Render *render);
     bool get_render_cell(const Render *render, int &col, int &row) const;

@@ -101,12 +101,6 @@ void App::render(void) {
 }
 
 //-----------------------------------------------------------------------------
-void App::add_texture(const string& file_name, int x, int y) { 
-    Texture *p = new Texture(window_renderer, file_name, x, y);
-    renders.push_back(p);
-}
-
-//-----------------------------------------------------------------------------
 void App::render_renders(void) {
     for(RendersI i = renders.begin(); i != renders.end(); i++) {
         (*i)->render();                
@@ -119,38 +113,52 @@ void App::delete_renders(void) {
         delete (*i);                
     }     
 }
+
 //-----------------------------------------------------------------------------
-void App::add_rectangle(const SDL_Rect &rect, const SDL_Color &color, bool fill) {
+Texture *App::add_texture(const string& file_name, int x, int y) { 
+    Texture *p = new Texture(window_renderer, file_name, x, y);
+    renders.push_back(p);
+    return p;
+}
+
+//-----------------------------------------------------------------------------
+Rectangle *App::add_rectangle(const SDL_Rect &rect, const SDL_Color &color, bool fill) {
     Rectangle *p = new Rectangle(window_renderer, rect, color, fill);
     renders.push_back(p);
+    return p;
 }
 //-----------------------------------------------------------------------------
-void App::add_rectangles(const vector<SDL_Rect> &rects, const SDL_Color &color, bool fill) {
+Rectangles *App::add_rectangles(const vector<SDL_Rect> &rects, const SDL_Color &color, bool fill) {
     Rectangles *p = new Rectangles(window_renderer, rects, color, fill);
     renders.push_back(p);
+    return p;
 }
 
 //-----------------------------------------------------------------------------
-void App::add_line(const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color) {
+Line *App::add_line(const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color) {
     Line *p = new Line(window_renderer, point1, point2, color);
     renders.push_back(p);
+    return p;
 }
 
-void App::add_lines(const vector<SDL_Point> &points, const SDL_Color &color) {
+Lines *App::add_lines(const vector<SDL_Point> &points, const SDL_Color &color) {
     Lines *p = new Lines(window_renderer, points, color);
     renders.push_back(p);    
+    return p;
 }
 
 //-----------------------------------------------------------------------------
-void App::add_point(const SDL_Point &point, const SDL_Color &color) {
+Point *App::add_point(const SDL_Point &point, const SDL_Color &color) {
     Point *p = new Point(window_renderer, point, color);
     renders.push_back(p);
+    return p;
 }
 
 //-----------------------------------------------------------------------------
-void App::add_points(const vector<SDL_Point> &points, const SDL_Color &color) {
+Points *App::add_points(const vector<SDL_Point> &points, const SDL_Color &color) {
     Points *p = new Points(window_renderer, points, color);
     renders.push_back(p);
+    return p;
 }
 
 //-----------------------------------------------------------------------------
@@ -186,15 +194,15 @@ void App::screen_shot(void) {
 
 //-----------------------------------------------------------------------------
 Render *App::get_render_at(int x, int y) {
-    for(auto r : renders) {
-        const Renders &rs = r->get_renders();
+    for (RendersCRI r = renders.rbegin(); r != renders.rend(); r++) {
+        const Renders &rs = (*r)->get_renders();
         for (RendersCRI i = rs.rbegin(); i != rs.rend(); i++) {
             if((*i)->rect_contains(x, y)) {
                 return *i;
             }
         }
-        if(r->rect_contains(x, y)) {
-            return r;
+        if((*r)->rect_contains(x, y)) {
+            return *r;
         }        
     }
     return nullptr;
