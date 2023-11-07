@@ -685,7 +685,7 @@ Render *Grid::remove_render(int col, int row) {
 Render *Grid::remove_render(Render *render) {
     int col, row;
     get_render_cell(render, col, row);
-    remove_render(col, row);
+    return remove_render(col, row);
 }
 
 //-----------------------------------------------------------------------------
