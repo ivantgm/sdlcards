@@ -20,13 +20,13 @@ public:
 protected:
     SDL_Renderer* window_renderer;
     Renders renders;    
-    void add_texture(const string& file_name, int x, int y);
-    void add_rectangle(const SDL_Rect &rect, const SDL_Color &color, bool fill);
-    void add_rectangles(const vector<SDL_Rect> &rects, const SDL_Color &color, bool fill);
-    void add_line(const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color);
-    void add_lines(const vector<SDL_Point> &points, const SDL_Color &color);
-    void add_point(const SDL_Point &point, const SDL_Color &color);
-    void add_points(const vector<SDL_Point> &points, const SDL_Color &color);
+    Texture *add_texture(const string& file_name, int x, int y);
+    Rectangle *add_rectangle(const SDL_Rect &rect, const SDL_Color &color, bool fill);
+    Rectangles *add_rectangles(const vector<SDL_Rect> &rects, const SDL_Color &color, bool fill);
+    Line *add_line(const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color);
+    Lines *add_lines(const vector<SDL_Point> &points, const SDL_Color &color);
+    Point *add_point(const SDL_Point &point, const SDL_Color &color);
+    Points *add_points(const vector<SDL_Point> &points, const SDL_Color &color);
     Grid *add_grid(
             int cols, int rows, 
             int col_size, int row_size, 
