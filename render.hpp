@@ -174,6 +174,8 @@ public:
     void set_y(int y);
     void move(int x, int y);  
     void get_rect(SDL_Rect &rect) const;    
+protected:
+    map<int, map<int, Render*> > map_renders;
 private:
     int cols;
     int rows;
@@ -182,8 +184,7 @@ private:
     int vline_size;
     int hline_size;
     int vpad;
-    int hpad;    
-    map<int, map<int, Render*> > map_renders;
+    int hpad;        
 };
 
 #endif

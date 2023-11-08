@@ -3,39 +3,18 @@
 //-----------------------------------------------------------------------------
 Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
 
-    void (*event_click)(Render*) = [](Render *r) {
-        Texture *t = dynamic_cast<Texture*>(r);
-        if(t) {
-            t->set_color(0x77, 0x77, 0xFF);    
-        }
-    };
+    int um_id_qualquer_ainda_nao_programado = 0;
 
-    for(int i = 0; i < 10; i++) {
-        Texture *texture = add_texture("image_teste.png", 100+(i*16), 150);
-        texture->on_mouse_click = event_click;  
+    CardGroup *group_vertical = add_card_group(Vertical);    
+    for(int i = 0; i < 5; i++) {
+      group_vertical->add_card(um_id_qualquer_ainda_nao_programado);
     }
 
-    Grid *grid = 
-    add_grid(
-        24,     /* cols */
-        8,     /* rows */
-        16,     /* col size */
-        32,     /* row size */
-        1,      /* vertical line size */
-        1,      /* horizontal line size */
-        3,      /* vertical padding */
-        3,      /* horizontal padding */
-        {
-            0x44, /* red */
-            0x44, /* green */
-            0x44, /* blue */
-            0x00  /* alpha */
-        }
-    );
-    
-    for(int i = 0; i < 10; i++) {
-      grid->add_texture(20, 4+i, "image_teste.png")->on_mouse_click = event_click;
-    }
+    CardGroup *group_horizontal = add_card_group(Horizontal);    
+    group_horizontal->set_xy(200, 200);
+    for(int i = 0; i < 5; i++) {
+      group_horizontal->add_card(um_id_qualquer_ainda_nao_programado);
+    }    
 }
 
 //-----------------------------------------------------------------------------

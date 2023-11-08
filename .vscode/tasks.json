@@ -12,6 +12,7 @@
                 "app.cpp",
                 "cacheta.cpp",
                 "render.cpp",
+                "card.cpp",
                 "-o",
                 "${fileDirname}/app",
                 "-lSDL2",
