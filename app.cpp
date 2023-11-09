@@ -184,6 +184,19 @@ Grid *App::add_grid(int cols, int rows, int col_size,
 }
 
 //-----------------------------------------------------------------------------
+Card *App::add_card(int card_id, int x, int y) {
+    Card *p = new Card(window_renderer, card_id, x, y);
+    renders.push_back(p);
+    return p;    
+}
+
+CardGroup *App::add_card_group(CardGroupDirection direction) {
+    CardGroup *p = new CardGroup(window_renderer, direction);
+    renders.push_back(p);
+    return p;    
+}
+
+//-----------------------------------------------------------------------------
 void App::screen_shot(void) {
     // https://stackoverflow.com/questions/22315980/sdl2-c-taking-a-screenshot
     SDL_Surface *ss = SDL_CreateRGBSurface(0, width, heigth, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);

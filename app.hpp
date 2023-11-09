@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "render.hpp"
+#include "card.hpp"
 
 using namespace std;
 
@@ -34,6 +35,8 @@ protected:
             int vpad, int hpad, 
             const SDL_Color &color
         );
+    Card *add_card(int card_id, int x, int y);
+    CardGroup *add_card_group(CardGroupDirection direction);
     Render *get_render_at(int x, int y);
 private:
     SDL_Window* window; 
