@@ -22,6 +22,9 @@ protected:
     SDL_Renderer* window_renderer;
     Renders renders;    
     Texture *add_texture(const string& file_name, int x, int y);
+    Texture *add_texture_text(const string& ttf_file_name, const string& text,
+            int x, int y, const SDL_Color &color, int font_size
+        );
     Rectangle *add_rectangle(const SDL_Rect &rect, const SDL_Color &color, bool fill);
     Rectangles *add_rectangles(const vector<SDL_Rect> &rects, const SDL_Color &color, bool fill);
     Line *add_line(const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color);
