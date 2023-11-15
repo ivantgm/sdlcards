@@ -26,6 +26,9 @@ App::App(const string& window_caption, int width, int heigth) {
     if(!(IMG_Init(imgFlags) & imgFlags)) {
         throw Exception("SDL_Image não inicializou", IMG_GetError());
     }
+    if(TTF_Init() == -1) {
+        throw Exception("SDL_ttf não inicializou", TTF_GetError());
+    }    
     window_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if(!window_renderer) {
         throw Exception("Não foi possível criar o renderizador da janela", SDL_GetError());
@@ -37,6 +40,8 @@ App::App(const string& window_caption, int width, int heigth) {
 App::~App() {
     delete_renders();
     SDL_DestroyWindow(window);
+    IMG_Quit();
+    TTF_Quit();
     SDL_Quit();
 }
 
@@ -119,6 +124,14 @@ Texture *App::add_texture(const string& file_name, int x, int y) {
     Texture *p = new Texture(window_renderer, file_name, x, y);
     renders.push_back(p);
     return p;
+}
+
+//-----------------------------------------------------------------------------
+Texture *App::add_texture_text(const string& ttf_file_name, const string& text,
+        int x, int y, const SDL_Color &color, int font_size) {
+    Texture *p = new Texture(window_renderer, ttf_file_name, text, x, y, color, font_size);
+    renders.push_back(p);
+    return p;    
 }
 
 //-----------------------------------------------------------------------------

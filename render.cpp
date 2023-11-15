@@ -112,6 +112,30 @@ Texture::Texture(SDL_Renderer* window_renderer, const string& file_name, int x, 
 }
 
 //-----------------------------------------------------------------------------
+Texture::Texture(SDL_Renderer* window_renderer, 
+        const string& ttf_file_name, const string& text,
+        int x, int y, const SDL_Color &color, int font_size) 
+    : Render(window_renderer) {
+    TTF_Font* font = TTF_OpenFont(ttf_file_name.c_str(), font_size);
+    if(!font) {
+        throw Exception("Não foi possível carregar a fonte " + ttf_file_name, TTF_GetError());    
+    }
+    SDL_Surface* temp_surface = TTF_RenderText_Solid(font, text.c_str(), color);
+    if(!temp_surface) {
+        throw Exception("Não foi possível renderizar o texto " + text, TTF_GetError());
+    }
+    SDL_GetClipRect(temp_surface, &rect);
+    rect.x = x;
+    rect.y = y;
+    texture = SDL_CreateTextureFromSurface(this->window_renderer, temp_surface);
+    if(!texture) {
+        throw Exception("Não foi possível criar a textura do texto " + text, SDL_GetError());
+    }
+    SDL_FreeSurface(temp_surface);
+    TTF_CloseFont(font);
+}
+
+//-----------------------------------------------------------------------------
 Texture::~Texture() {
     SDL_DestroyTexture(texture);
 }

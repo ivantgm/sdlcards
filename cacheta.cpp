@@ -14,7 +14,13 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     group_horizontal->set_xy(200, 200);
     for(int i = 0; i < 5; i++) {
       group_horizontal->add_card(um_id_qualquer_ainda_nao_programado);
-    }    
+    } 
+
+    add_texture_text(
+        "28 Days Later.ttf", 
+        "ABCDEFGHIJKLMNOPKRSTUVWXYZ", 
+        100, 10, {0xFF, 0xFF, 0xFF, 0xFF}, 48
+    );   
 }
 
 //-----------------------------------------------------------------------------

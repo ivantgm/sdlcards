@@ -6,6 +6,7 @@
 #include <map>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 using namespace std;
 
@@ -51,6 +52,13 @@ public:
 class Texture : public Render {
 public:
     Texture(SDL_Renderer* window_renderer, const string& file_name, int x, int y);
+    Texture(SDL_Renderer* window_renderer, 
+            const string& ttf_file_name, 
+            const string& text,
+            int x, int y, 
+            const SDL_Color &color,
+            int font_size
+    );
     ~Texture();
 public:      
     SDL_Rect rect;
