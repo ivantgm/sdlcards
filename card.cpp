@@ -16,9 +16,9 @@ Card::Card(SDL_Renderer* window_renderer, int card_id, int x, int y)
 
 //-----------------------------------------------------------------------------
 string Card::determine_file_name(int card_id) {
-    // essa função vai gerar o nome do arquivo com base no card_id ;-)
-    // mais ainda falta o pack de imagens :-(
-    return "image_teste.png";
+    char s[32];
+    sprintf(s, "%03d", card_id);
+    return "./img/120x180/" + string(s) + ".png";
 }
 
 //-----------------------------------------------------------------------------
