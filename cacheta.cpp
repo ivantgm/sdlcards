@@ -3,23 +3,26 @@
 //-----------------------------------------------------------------------------
 Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
 
-    int um_id_qualquer_ainda_nao_programado = 0;
-
-    CardGroup *group_vertical = add_card_group(Vertical);    
-    for(int i = 0; i < 5; i++) {
-      group_vertical->add_card(um_id_qualquer_ainda_nao_programado);
+    CardGroup *group_1 = add_card_group(Horizontal);    
+    group_1->set_xy(0, 100);
+    for(int i = 1; i <= 7; i++) {
+        for(int j = 1; j <=4; j++) {
+            group_1->add_card(i*10+j);
+        }
     }
 
-    CardGroup *group_horizontal = add_card_group(Horizontal);    
-    group_horizontal->set_xy(200, 200);
-    for(int i = 0; i < 5; i++) {
-      group_horizontal->add_card(um_id_qualquer_ainda_nao_programado);
-    } 
+    CardGroup *group_2 = add_card_group(Horizontal);    
+    group_2->set_xy(0, 300);
+    for(int i = 8; i <= 13; i++) {
+        for(int j = 1; j <=4; j++) {
+            group_2->add_card(i*10+j);
+        }
+    }     
 
     add_texture_text(
         "28 Days Later.ttf", 
-        "ABCDEFGHIJKLMNOPKRSTUVWXYZ", 
-        100, 10, {0xFF, 0xFF, 0xFF, 0xFF}, 48
+        "CACHETA", 
+        100, 10, {0xFF, 0xFF, 0xFF, 0xFF}, 96
     );   
 }
 
