@@ -19,11 +19,38 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
         }
     }     
 
-    add_texture_text(
+    Texture *btn1 = add_texture_text(
         "28 Days Later.ttf", 
-        "CACHETA", 
-        100, 10, {0xFF, 0xFF, 0xFF, 0xFF}, 96
-    );   
+        "MOVE BAIXO", 
+        10, 10, {0x00, 0x00, 0xFF, 0xFF}, 48
+    );
+    void (*btn1_click)(Render*) = [](Render *r) {
+        App *app = r->app;
+        CardGroup *group_source = dynamic_cast<CardGroup*>(app->renders[0]);
+        CardGroup *group_dest = dynamic_cast<CardGroup*>(app->renders[1]);
+
+        Card *removed_card = dynamic_cast<Card*>(group_source->remove_render(*(group_source->get_renders().rbegin())));        
+        group_dest->add_card(removed_card);       
+
+    };
+    btn1->on_mouse_click = btn1_click;
+
+    Texture *btn2 = add_texture_text(
+        "28 Days Later.ttf", 
+        "MOVE CIMA", 
+        350, 10, {0xFF, 0x00, 0x00, 0xFF}, 48
+    );
+    void (*btn2_click)(Render*) = [](Render *r) {
+        App *app = r->app;
+        CardGroup *group_source = dynamic_cast<CardGroup*>(app->renders[1]);
+        CardGroup *group_dest = dynamic_cast<CardGroup*>(app->renders[0]);
+
+        Card *removed_card = dynamic_cast<Card*>(group_source->remove_render(*(group_source->get_renders().rbegin())));
+        group_dest->add_card(removed_card);       
+
+    };
+    btn2->on_mouse_click = btn2_click;
+
 }
 
 //-----------------------------------------------------------------------------

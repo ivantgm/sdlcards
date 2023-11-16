@@ -14,13 +14,14 @@ class App {
 public:
     App(const string& window_caption, int width, int heigth);
     ~App();
-public:    
+public:        
+    Renders renders;
+public:
+    SDL_Renderer* get_window_renderer(void);
     void loop(void);
     virtual void poll_event(SDL_Event *e);
     void screen_shot(void);
-protected:
-    SDL_Renderer* window_renderer;
-    Renders renders;    
+protected:       
     Texture *add_texture(const string& file_name, int x, int y);
     Texture *add_texture_text(const string& ttf_file_name, const string& text,
             int x, int y, const SDL_Color &color, int font_size
@@ -43,6 +44,7 @@ protected:
     Render *get_render_at(int x, int y);
 private:
     SDL_Window* window; 
+    SDL_Renderer* window_renderer;
     int width;
     int heigth;
 private:

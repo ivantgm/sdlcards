@@ -1,5 +1,6 @@
 #include "render.hpp"
 #include "exception.hpp"
+#include "app.hpp"
 #include <string>
 #include <algorithm>
 #include <limits>
@@ -16,13 +17,13 @@ void inflate_rect(SDL_Rect &rect, int amount) {
 //-----------------------------------------------------------------------------
 //- Render --------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Render::Render(SDL_Renderer* window_renderer) {
+Render::Render(App *app) {
     on_mouse_over = nullptr;
     on_mouse_leave = nullptr;
     on_mouse_click = nullptr;
     on_mouse_dclick = nullptr;
     owner = nullptr;
-    this->window_renderer = window_renderer;
+    this->app = app;
 }
 
 //-----------------------------------------------------------------------------
@@ -95,8 +96,8 @@ void Render::mouse_dclick(void) {
 //-----------------------------------------------------------------------------
 //- Texture -------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Texture::Texture(SDL_Renderer* window_renderer, const string& file_name, int x, int y) 
-    : Render(window_renderer) {    
+Texture::Texture(App *app, const string& file_name, int x, int y) 
+    : Render(app) {    
     SDL_Surface* temp_surface = IMG_Load(file_name.c_str());
     if(!temp_surface) {
         throw Exception("Não foi possível carregar a imagem " + file_name, IMG_GetError());
@@ -104,7 +105,7 @@ Texture::Texture(SDL_Renderer* window_renderer, const string& file_name, int x, 
     SDL_GetClipRect(temp_surface, &rect);
     rect.x = x;
     rect.y = y;
-    texture = SDL_CreateTextureFromSurface(this->window_renderer, temp_surface);
+    texture = SDL_CreateTextureFromSurface(app->get_window_renderer(), temp_surface);
     if(!texture) {
         throw Exception("Não foi possível criar a textura " + file_name, SDL_GetError());
     }
@@ -112,10 +113,10 @@ Texture::Texture(SDL_Renderer* window_renderer, const string& file_name, int x, 
 }
 
 //-----------------------------------------------------------------------------
-Texture::Texture(SDL_Renderer* window_renderer, 
+Texture::Texture(App *app, 
         const string& ttf_file_name, const string& text,
         int x, int y, const SDL_Color &color, int font_size) 
-    : Render(window_renderer) {
+    : Render(app) {
     TTF_Font* font = TTF_OpenFont(ttf_file_name.c_str(), font_size);
     if(!font) {
         throw Exception("Não foi possível carregar a fonte " + ttf_file_name, TTF_GetError());    
@@ -127,7 +128,7 @@ Texture::Texture(SDL_Renderer* window_renderer,
     SDL_GetClipRect(temp_surface, &rect);
     rect.x = x;
     rect.y = y;
-    texture = SDL_CreateTextureFromSurface(this->window_renderer, temp_surface);
+    texture = SDL_CreateTextureFromSurface(app->get_window_renderer(), temp_surface);
     if(!texture) {
         throw Exception("Não foi possível criar a textura do texto " + text, SDL_GetError());
     }
@@ -142,7 +143,7 @@ Texture::~Texture() {
 
 //-----------------------------------------------------------------------------
 void Texture::render() {
-    SDL_RenderCopy(window_renderer, texture, NULL, &rect);
+    SDL_RenderCopy(app->get_window_renderer(), texture, NULL, &rect);
 }
 
 //-----------------------------------------------------------------------------
@@ -187,8 +188,8 @@ void Texture::set_color(Uint8 r, Uint8 g, Uint8 b) {
 //-----------------------------------------------------------------------------
 //- Rectangle -----------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Rectangle::Rectangle(SDL_Renderer* window_renderer, const SDL_Rect &rect, const SDL_Color &color, bool fill) 
-    : Render(window_renderer) {        
+Rectangle::Rectangle(App *app, const SDL_Rect &rect, const SDL_Color &color, bool fill) 
+    : Render(app) {        
     this->rect = rect;
     this->color = color;
     this->fill = fill;
@@ -201,11 +202,11 @@ Rectangle::~Rectangle() {
 
 //-----------------------------------------------------------------------------
 void Rectangle::render() {
-    SDL_SetRenderDrawColor(window_renderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor(app->get_window_renderer(), color.r, color.g, color.b, color.a);
     if(fill) {
-        SDL_RenderFillRect(window_renderer, &rect);   
+        SDL_RenderFillRect(app->get_window_renderer(), &rect);   
     } else {
-        SDL_RenderDrawRect(window_renderer, &rect);   
+        SDL_RenderDrawRect(app->get_window_renderer(), &rect);   
     }
     
 }
@@ -238,8 +239,8 @@ void Rectangle::get_rect(SDL_Rect &rect) const {
 //-----------------------------------------------------------------------------
 //- Line ----------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Line::Line(SDL_Renderer* window_renderer, const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color) 
-    : Render(window_renderer) {
+Line::Line(App *app, const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color) 
+    : Render(app) {
     this->point1 = point1;
     this->point2 = point2;
     this->color = color;
@@ -251,8 +252,8 @@ Line::~Line() {
 }
 //-----------------------------------------------------------------------------
 void Line::render(void) {
-    SDL_SetRenderDrawColor(window_renderer, color.r, color.g, color.b, color.a);      
-    SDL_RenderDrawLine(window_renderer, point1.x, point1.y, point2.x, point2.y); 
+    SDL_SetRenderDrawColor(app->get_window_renderer(), color.r, color.g, color.b, color.a);      
+    SDL_RenderDrawLine(app->get_window_renderer(), point1.x, point1.y, point2.x, point2.y); 
 }
 //-----------------------------------------------------------------------------
 void Line::set_x(int x) {
@@ -285,8 +286,8 @@ void Line::get_rect(SDL_Rect &rect) const {
 //-----------------------------------------------------------------------------
 //- Lines ---------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Lines::Lines(SDL_Renderer* window_renderer, const vector<SDL_Point> &points, const SDL_Color &color) 
-    : Render(window_renderer) {
+Lines::Lines(App *app, const vector<SDL_Point> &points, const SDL_Color &color) 
+    : Render(app) {
     this->points = points;
     this->color = color;
 }
@@ -298,8 +299,8 @@ Lines::~Lines() {
 
 //-----------------------------------------------------------------------------
 void Lines::render(void) {
-    SDL_SetRenderDrawColor(window_renderer, color.r, color.g, color.b, color.a);      
-    SDL_RenderDrawLines(window_renderer, points.data(), points.size()); 
+    SDL_SetRenderDrawColor(app->get_window_renderer(), color.r, color.g, color.b, color.a);      
+    SDL_RenderDrawLines(app->get_window_renderer(), points.data(), points.size()); 
 }
 
 //-----------------------------------------------------------------------------
@@ -353,8 +354,8 @@ void Lines::get_rect(SDL_Rect &rect) const {
 //-----------------------------------------------------------------------------
 //- Point ---------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Point::Point(SDL_Renderer* window_renderer, const SDL_Point &point, const SDL_Color &color) 
-    : Render(window_renderer) {
+Point::Point(App *app, const SDL_Point &point, const SDL_Color &color) 
+    : Render(app) {
     this->point = point;
     this->color = color;
 }
@@ -365,8 +366,8 @@ Point::~Point() {
 }
 //-----------------------------------------------------------------------------
 void Point::render(void) {
-    SDL_SetRenderDrawColor(window_renderer, color.r, color.g, color.b, color.a);      
-    SDL_RenderDrawPoint(window_renderer, point.x, point.y);  
+    SDL_SetRenderDrawColor(app->get_window_renderer(), color.r, color.g, color.b, color.a);      
+    SDL_RenderDrawPoint(app->get_window_renderer(), point.x, point.y);  
 }
 
 //-----------------------------------------------------------------------------
@@ -396,8 +397,8 @@ void Point::get_rect(SDL_Rect &rect) const {
 //-----------------------------------------------------------------------------
 //- Rectangles ----------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Rectangles::Rectangles(SDL_Renderer* window_renderer, const vector<SDL_Rect>&rects, const SDL_Color &color, bool fill) 
-    : Render(window_renderer) {
+Rectangles::Rectangles(App *app, const vector<SDL_Rect>&rects, const SDL_Color &color, bool fill) 
+    : Render(app) {
     this->rects = rects;
     this->color = color;
     this->fill = fill;
@@ -408,11 +409,11 @@ Rectangles::~Rectangles() {
 }
 //-----------------------------------------------------------------------------
 void Rectangles::render(void) {
-    SDL_SetRenderDrawColor(window_renderer, color.r, color.g, color.b, color.a);      
+    SDL_SetRenderDrawColor(app->get_window_renderer(), color.r, color.g, color.b, color.a);      
     if(fill) {
-        SDL_RenderFillRects(window_renderer, rects.data(), rects.size());   
+        SDL_RenderFillRects(app->get_window_renderer(), rects.data(), rects.size());   
     } else {
-        SDL_RenderDrawRects(window_renderer, rects.data(), rects.size());   
+        SDL_RenderDrawRects(app->get_window_renderer(), rects.data(), rects.size());   
     }
 }
 
@@ -476,8 +477,8 @@ void Rectangles::get_rect(SDL_Rect &rect) const {
 //-----------------------------------------------------------------------------
 //- Points --------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Points::Points(SDL_Renderer* window_renderer, const vector<SDL_Point>&points, const SDL_Color &color) 
-    : Render(window_renderer) {
+Points::Points(App *app, const vector<SDL_Point>&points, const SDL_Color &color) 
+    : Render(app) {
     this->points = points;
     this->color = color;
 }
@@ -489,8 +490,8 @@ Points::~Points() {
 
 //-----------------------------------------------------------------------------
 void Points::render(void) {
-    SDL_SetRenderDrawColor(window_renderer, color.r, color.g, color.b, color.a);      
-    SDL_RenderDrawPoints(window_renderer, points.data(), points.size());  
+    SDL_SetRenderDrawColor(app->get_window_renderer(), color.r, color.g, color.b, color.a);      
+    SDL_RenderDrawPoints(app->get_window_renderer(), points.data(), points.size());  
 }
 
 //-----------------------------------------------------------------------------
@@ -543,12 +544,12 @@ void Points::get_rect(SDL_Rect &rect) const {
 //-----------------------------------------------------------------------------
 //- Grid ----------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Grid::Grid(SDL_Renderer* window_renderer, 
+Grid::Grid(App *app, 
            int cols, int rows, int col_size, 
            int row_size, int vline_size, int hline_size,
            int vpad, int hpad,
            const SDL_Color &color)
-    : Rectangles(window_renderer, vector<SDL_Rect>(), color, true) {
+    : Rectangles(app, vector<SDL_Rect>(), color, true) {
 
     this->cols = cols;
     this->rows = rows;
@@ -590,7 +591,7 @@ void Grid::get_cell_rect(int col, int row, SDL_Rect &rect) const {
 Rectangle *Grid::add_retangle(int col, int row, const SDL_Color &color, bool fill) {
     SDL_Rect rect;
     get_cell_rect(col, row, rect);
-    Rectangle *p = new Rectangle(window_renderer, rect, color, fill);
+    Rectangle *p = new Rectangle(app, rect, color, fill);
     renders.push_back(p);
     map_renders[col][row] = p;
     p->owner = this;
@@ -601,7 +602,7 @@ Rectangle *Grid::add_retangle(int col, int row, const SDL_Color &color, bool fil
 Texture *Grid::add_texture(int col, int row, const string& file_name) { 
     SDL_Rect rect;
     get_cell_rect(col, row, rect);    
-    Texture *p = new Texture(window_renderer, file_name, rect.x, rect.y);
+    Texture *p = new Texture(app, file_name, rect.x, rect.y);
     renders.push_back(p);
     map_renders[col][row] = p;
     p->owner = this;
@@ -726,5 +727,16 @@ bool Grid::get_render_cell(const Render *render, int &col, int &row) const {
         }
     }
     return false;
+}
+
+//-----------------------------------------------------------------------------
+Render *Grid::add_render(int col, int row, Render *render) {
+    SDL_Rect rect;
+    get_cell_rect(col, row, rect);
+    render->set_xy(rect.x, rect.y);
+    renders.push_back(render);
+    map_renders[col][row] = render;
+    render->owner = this;
+    return render;
 }
 

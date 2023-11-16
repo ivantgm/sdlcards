@@ -1,8 +1,8 @@
 #include "card.hpp"
 
 //-----------------------------------------------------------------------------
-Card::Card(SDL_Renderer* window_renderer, int card_id, int x, int y) 
-     :Texture(window_renderer, determine_file_name(card_id), x, y) {
+Card::Card(App *app, int card_id, int x, int y) 
+     :Texture(app, determine_file_name(card_id), x, y) {
     
     void (*event_click)(Render*) = [](Render *r) {
         Card *c = dynamic_cast<Card*>(r);
@@ -40,14 +40,13 @@ bool Card::get_selected(void) {
 //-----------------------------------------------------------------------------
 //- CardGroup -----------------------------------------------------------------
 //-----------------------------------------------------------------------------
-CardGroup::CardGroup(SDL_Renderer* window_renderer, CardGroupDirection direction) 
-    : Grid(window_renderer, 0, 0, 18, 24, 0, 0, 0, 0, SDL_Color()) {
+CardGroup::CardGroup(App *app, CardGroupDirection direction) 
+    : Grid(app, 0, 0, 18, 24, 0, 0, 0, 0, SDL_Color()) {
     this->direction = direction;
 }
 
 //-----------------------------------------------------------------------------
-Card *CardGroup::add_card(int card_id) {
-    int col, row;
+void CardGroup::inc_col_row(int &col, int &row, SDL_Rect &rect) {
     switch(direction) {
         case Vertical: {
             col = 0;
@@ -60,12 +59,32 @@ Card *CardGroup::add_card(int card_id) {
             break;
         }
     }
+    get_cell_rect(col, row, rect);
+}
+
+//-----------------------------------------------------------------------------
+Card *CardGroup::add_card(int card_id) {
+    int col, row;
     SDL_Rect rect;
-    get_cell_rect(col, row, rect);    
-    Card *p = new Card(window_renderer, card_id, rect.x, rect.y);
-    renders.push_back(p);
-    map_renders[col][row] = p;
-    p->owner = this;
-    return p;    
+    inc_col_row(col, row, rect);
+    Card *card = new Card(app, card_id, rect.x, rect.y);
+    return add(card, col, row);    
+}
+
+//-----------------------------------------------------------------------------
+Card *CardGroup::add_card(Card *card) {
+    int col, row;
+    SDL_Rect rect;
+    inc_col_row(col, row, rect);    
+    card->set_xy(rect.x, rect.y);    
+    return add(card, col, row);
+}
+
+//-----------------------------------------------------------------------------
+Card *CardGroup::add(Card *card, int col, int row) {
+    renders.push_back(card);
+    map_renders[col][row] = card;
+    card->owner = this; 
+    return card;   
 }
 

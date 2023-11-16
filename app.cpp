@@ -46,6 +46,11 @@ App::~App() {
 }
 
 //-----------------------------------------------------------------------------
+SDL_Renderer* App::get_window_renderer(void) {
+    return window_renderer;
+}
+
+//-----------------------------------------------------------------------------
 void App::loop(void) {
     SDL_Event e; 
     bool quit = false; 
@@ -121,7 +126,7 @@ void App::delete_renders(void) {
 
 //-----------------------------------------------------------------------------
 Texture *App::add_texture(const string& file_name, int x, int y) { 
-    Texture *p = new Texture(window_renderer, file_name, x, y);
+    Texture *p = new Texture(this, file_name, x, y);
     renders.push_back(p);
     return p;
 }
@@ -129,47 +134,47 @@ Texture *App::add_texture(const string& file_name, int x, int y) {
 //-----------------------------------------------------------------------------
 Texture *App::add_texture_text(const string& ttf_file_name, const string& text,
         int x, int y, const SDL_Color &color, int font_size) {
-    Texture *p = new Texture(window_renderer, ttf_file_name, text, x, y, color, font_size);
+    Texture *p = new Texture(this, ttf_file_name, text, x, y, color, font_size);
     renders.push_back(p);
     return p;    
 }
 
 //-----------------------------------------------------------------------------
 Rectangle *App::add_rectangle(const SDL_Rect &rect, const SDL_Color &color, bool fill) {
-    Rectangle *p = new Rectangle(window_renderer, rect, color, fill);
+    Rectangle *p = new Rectangle(this, rect, color, fill);
     renders.push_back(p);
     return p;
 }
 //-----------------------------------------------------------------------------
 Rectangles *App::add_rectangles(const vector<SDL_Rect> &rects, const SDL_Color &color, bool fill) {
-    Rectangles *p = new Rectangles(window_renderer, rects, color, fill);
+    Rectangles *p = new Rectangles(this, rects, color, fill);
     renders.push_back(p);
     return p;
 }
 
 //-----------------------------------------------------------------------------
 Line *App::add_line(const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color) {
-    Line *p = new Line(window_renderer, point1, point2, color);
+    Line *p = new Line(this, point1, point2, color);
     renders.push_back(p);
     return p;
 }
 
 Lines *App::add_lines(const vector<SDL_Point> &points, const SDL_Color &color) {
-    Lines *p = new Lines(window_renderer, points, color);
+    Lines *p = new Lines(this, points, color);
     renders.push_back(p);    
     return p;
 }
 
 //-----------------------------------------------------------------------------
 Point *App::add_point(const SDL_Point &point, const SDL_Color &color) {
-    Point *p = new Point(window_renderer, point, color);
+    Point *p = new Point(this, point, color);
     renders.push_back(p);
     return p;
 }
 
 //-----------------------------------------------------------------------------
 Points *App::add_points(const vector<SDL_Point> &points, const SDL_Color &color) {
-    Points *p = new Points(window_renderer, points, color);
+    Points *p = new Points(this, points, color);
     renders.push_back(p);
     return p;
 }
@@ -180,7 +185,7 @@ Grid *App::add_grid(int cols, int rows, int col_size,
                    int vpad, int hpad, 
                    const SDL_Color &color) {
     Grid *p = new Grid(
-        window_renderer, 
+        this, 
         cols, 
         rows, 
         col_size, 
@@ -198,13 +203,13 @@ Grid *App::add_grid(int cols, int rows, int col_size,
 
 //-----------------------------------------------------------------------------
 Card *App::add_card(int card_id, int x, int y) {
-    Card *p = new Card(window_renderer, card_id, x, y);
+    Card *p = new Card(this, card_id, x, y);
     renders.push_back(p);
     return p;    
 }
 
 CardGroup *App::add_card_group(CardGroupDirection direction) {
-    CardGroup *p = new CardGroup(window_renderer, direction);
+    CardGroup *p = new CardGroup(this, direction);
     renders.push_back(p);
     return p;    
 }
