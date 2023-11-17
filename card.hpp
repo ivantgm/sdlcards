@@ -10,7 +10,7 @@ enum CardGroupDirection {
 
 class Card: public Texture {
 public:
-    Card(SDL_Renderer* window_renderer, int card_id, int x, int y);
+    Card(App *app, int card_id, int x, int y);
 public:
     void set_selected(bool selected);
     bool get_selected(void);
@@ -21,11 +21,14 @@ private:
 
 class CardGroup: public Grid {
 public:
-    CardGroup(SDL_Renderer* window_renderer, CardGroupDirection direction);
+    CardGroup(App *app, CardGroupDirection direction);
 public:
-    Card *add_card(int card_id);    
+    Card *add_card(int card_id);
+    Card *add_card(Card *card);
 private:
-    CardGroupDirection direction;        
+    CardGroupDirection direction; 
+    void inc_col_row(int &col, int &row, SDL_Rect &rect);
+    Card *add(Card *card, int col, int row);
 };
 
 #endif

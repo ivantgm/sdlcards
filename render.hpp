@@ -10,6 +10,7 @@
 
 using namespace std;
 
+class App;
 class Render;
 
 typedef vector<Render*> Renders;
@@ -21,12 +22,12 @@ void inflate_rect(SDL_Rect &rect, int amount);
 
 class Render {
 protected:
-    SDL_Renderer* window_renderer;
     Renders renders;
 public:
-    Render(SDL_Renderer* window_renderer);
+    Render(App *app);
     virtual ~Render();
 public:
+    App *app;
     Render *owner;
     SDL_Color color;
     virtual void render(void) = 0;
@@ -51,8 +52,8 @@ public:
 
 class Texture : public Render {
 public:
-    Texture(SDL_Renderer* window_renderer, const string& file_name, int x, int y);
-    Texture(SDL_Renderer* window_renderer, 
+    Texture(App *app, const string& file_name, int x, int y);
+    Texture(App *app, 
             const string& ttf_file_name, 
             const string& text,
             int x, int y, 
@@ -76,7 +77,7 @@ private:
 
 class Rectangle : public Render {
 public:
-    Rectangle(SDL_Renderer* window_renderer, const SDL_Rect &rect, const SDL_Color &color, bool fill);
+    Rectangle(App *app, const SDL_Rect &rect, const SDL_Color &color, bool fill);
     ~Rectangle();
 public:
     SDL_Rect rect;
@@ -91,7 +92,7 @@ private:
 
 class Rectangles : public Render {
 public:
-    Rectangles(SDL_Renderer* window_renderer, const vector<SDL_Rect>&rects, const SDL_Color &color, bool fill);
+    Rectangles(App *app, const vector<SDL_Rect>&rects, const SDL_Color &color, bool fill);
     ~Rectangles();
 public:
     void render(void);
@@ -108,7 +109,7 @@ private:
 
 class Line : public Render {
 public:
-    Line(SDL_Renderer* window_renderer, const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color);
+    Line(App *app, const SDL_Point &point1, const SDL_Point &point2, const SDL_Color &color);
     ~Line();
 public:
     SDL_Point point1, point2;
@@ -121,7 +122,7 @@ public:
 
 class Lines : public Render {
 public:
-    Lines(SDL_Renderer* window_renderer, const vector<SDL_Point> &points, const SDL_Color &color);
+    Lines(App *app, const vector<SDL_Point> &points, const SDL_Color &color);
     ~Lines();
 public:
     void render(void);
@@ -135,7 +136,7 @@ private:
 
 class Point : public Render {
 public:
-    Point(SDL_Renderer* window_renderer, const SDL_Point &point, const SDL_Color &color);
+    Point(App *app, const SDL_Point &point, const SDL_Color &color);
     ~Point();
 public:
     SDL_Point point;
@@ -148,7 +149,7 @@ public:
 
 class Points : public Render {
 public:
-    Points(SDL_Renderer* window_renderer, const vector<SDL_Point>&points, const SDL_Color &color);
+    Points(App *app, const vector<SDL_Point>&points, const SDL_Color &color);
     ~Points();
 public:
     void render(void);
@@ -162,7 +163,7 @@ private:
 
 class Grid : public Rectangles {
 public:
-    Grid(SDL_Renderer* window_renderer, 
+    Grid(App *app, 
          int cols, int rows, int col_size, 
          int row_size, int vline_size, int hline_size,
          int vpad, int hpad,
@@ -176,6 +177,7 @@ public:
     Render *remove_render(Render *render);
     bool get_render_cell(const Render *render, int &col, int &row) const;
     Render *get_render(int col, int row);
+    Render *add_render(int col, int row, Render *render);
 public:
     void render(void);    
     void set_x(int x);
