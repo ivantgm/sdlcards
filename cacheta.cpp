@@ -29,9 +29,13 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
         CardGroup *group_source = dynamic_cast<CardGroup*>(app->renders[0]);
         CardGroup *group_dest = dynamic_cast<CardGroup*>(app->renders[1]);
 
-        Card *removed_card = dynamic_cast<Card*>(group_source->remove_render(*(group_source->get_renders().rbegin())));        
-        group_dest->add_card(removed_card);       
-
+        Cards cards_source = group_source->get_selecteds();
+        for(int i = 0; i < cards_source.size(); i++) {
+            Card *removed_card = group_source->remove_card(cards_source[i]);
+            if(removed_card) {
+                group_dest->add_card(removed_card);
+            }
+        }
     };
     btn1->on_mouse_click = btn1_click;
 
@@ -45,9 +49,13 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
         CardGroup *group_source = dynamic_cast<CardGroup*>(app->renders[1]);
         CardGroup *group_dest = dynamic_cast<CardGroup*>(app->renders[0]);
 
-        Card *removed_card = dynamic_cast<Card*>(group_source->remove_render(*(group_source->get_renders().rbegin())));
-        group_dest->add_card(removed_card);       
-
+        Cards cards_source = group_source->get_selecteds();
+        for(int i = 0; i < cards_source.size(); i++) {
+            Card *removed_card = group_source->remove_card(cards_source[i]);
+            if(removed_card) {
+                group_dest->add_card(removed_card);
+            }
+        }
     };
     btn2->on_mouse_click = btn2_click;
 

@@ -700,7 +700,7 @@ Render *Grid::get_render(int col, int row) {
 //-----------------------------------------------------------------------------
 Render *Grid::remove_render(int col, int row) {
     Render *result = get_render(col, row);
-    map_renders[col][row] = NULL;
+    map_renders[col][row] = nullptr;
     RendersI position = find(renders.begin(), renders.end(), result);
     if(position != renders.end())  {
         renders.erase(position);
