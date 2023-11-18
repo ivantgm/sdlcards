@@ -31,8 +31,11 @@ public:
     Card *add_card(Card *card);
     Card *remove_card(int card_id);
     Card *remove_card(Card *card);
+    Card *insert_card(int card_id, int index);
+    Card *insert_card(Card *card, int index);
     Cards get_cards(void) const;
     Cards get_selecteds(bool selecteds = true) const;
+    void select_all(bool select = true);
 private:
     CardGroupDirection direction; 
     void inc_col_row(int &col, int &row, SDL_Rect &rect);

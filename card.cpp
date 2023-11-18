@@ -178,5 +178,42 @@ Cards CardGroup::get_selecteds(bool selecteds) const {
     return cards;
 }
 
+//-----------------------------------------------------------------------------
+Card *CardGroup::insert_card(int card_id, int index) {    
+    Card *card = new Card(app, card_id, 0, 0);    
+    return insert_card(card, index);
+}
+
+//-----------------------------------------------------------------------------
+Card *CardGroup::insert_card(Card *card, int index) {
+    int col = direction==Vertical ? 0 : index;
+    int row = direction==Horizontal ? 0 : index;
+    SDL_Rect rect;
+    get_cell_rect(col, row, rect);
+    card->set_xy(rect.x, rect.y);
+    renders.insert(renders.begin() + index, card);
+    map_renders[col][row] = card;
+
+    Cards cards = get_cards();
+    for(int i = index; i < cards.size(); i++) {
+        col = direction==Vertical ? 0 : i;
+        row = direction==Horizontal ? 0 : i;
+        map_renders[col][row] = cards[i];
+        get_cell_rect(col, row, rect);
+        cards[i]->set_xy(rect.x, rect.y);
+    }    
+    card->owner = this; 
+    return card;   
+}
+
+//-----------------------------------------------------------------------------
+void CardGroup::select_all(bool select) {
+    for (auto &i : renders) {
+        Card *c = dynamic_cast<Card*>(i);
+        if(c) {
+            c->set_selected(select);
+        }
+    }
+}
 
 
