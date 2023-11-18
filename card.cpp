@@ -123,6 +123,16 @@ Card *CardGroup::remove_card(Card *card) {
 
     switch(direction) {
         case Vertical: {
+            for(int i = row; i < cards.size(); i++) {
+                SDL_Rect rect;
+                get_cell_rect(col, i, rect);
+                Card *c = cards[i];
+                if(c) {
+                    c->set_xy(rect.x, rect.y);
+                    map_renders[col][i] = c;
+                    map_renders[col][i+1] = nullptr;
+                }
+            }
             break;
         }
         case Horizontal: {
