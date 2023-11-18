@@ -10,6 +10,7 @@ Card::Card(App *app, int card_id, int x, int y)
             c->set_selected(!c->get_selected());
         }
     };
+    this->card_id = card_id;
     on_mouse_click = event_click;
     set_selected(false);
 }
@@ -32,9 +33,15 @@ void Card::set_selected(bool selected) {
 }
 
 //-----------------------------------------------------------------------------
-bool Card::get_selected(void) {
+bool Card::get_selected(void) const {
     return selected;
 }
+
+//-----------------------------------------------------------------------------
+int Card::get_card_id(void) const {
+    return card_id;
+}
+
 
 
 //-----------------------------------------------------------------------------
@@ -87,4 +94,89 @@ Card *CardGroup::add(Card *card, int col, int row) {
     card->owner = this; 
     return card;   
 }
+
+//-----------------------------------------------------------------------------
+Card *CardGroup::remove_card(int card_id)  {
+    Card *result = nullptr;
+    for (auto &i : renders) {
+        Card *c = dynamic_cast<Card*>(i);
+        if(c) {
+            if(c->get_card_id() == card_id) {
+                result = c;
+                break;
+            }
+        }
+    }
+    return remove_card(result);   
+}
+
+//-----------------------------------------------------------------------------
+Card *CardGroup::remove_card(Card *card) {
+    if(!card) {
+        return nullptr;
+    }
+    int col, row;
+    get_render_cell(card, col, row);
+    remove_render(card);
+    
+    Cards cards = get_cards();
+
+    switch(direction) {
+        case Vertical: {
+            for(int i = row; i < cards.size(); i++) {
+                SDL_Rect rect;
+                get_cell_rect(col, i, rect);
+                Card *c = cards[i];
+                if(c) {
+                    c->set_xy(rect.x, rect.y);
+                    map_renders[col][i] = c;
+                    map_renders[col][i+1] = nullptr;
+                }
+            }
+            break;
+        }
+        case Horizontal: {
+            for(int i = col; i < cards.size(); i++) {
+                SDL_Rect rect;
+                get_cell_rect(i, row, rect);
+                Card *c = cards[i];
+                if(c) {
+                    c->set_xy(rect.x, rect.y);
+                    map_renders[i][row] = c;
+                    map_renders[i+1][row] = nullptr;
+                }
+            }
+            break;
+        }
+    }
+    return card;
+}
+
+//-----------------------------------------------------------------------------
+Cards CardGroup::get_cards(void) const {
+    Cards cards;
+    for (auto &i : renders) {
+        Card *c = dynamic_cast<Card*>(i);
+        if(c) {
+            cards.push_back(c);
+        }
+    }
+    return cards;
+}
+
+//-----------------------------------------------------------------------------
+Cards CardGroup::get_selecteds(bool selecteds) const {
+    Cards cards;
+    for (auto &i : renders) {
+        Card *c = dynamic_cast<Card*>(i);
+        if(c) {
+            if(c->get_selected() == selecteds) {
+                cards.push_back(c);
+            }            
+        }
+    }
+    return cards;
+}
+
+
 

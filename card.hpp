@@ -13,11 +13,15 @@ public:
     Card(App *app, int card_id, int x, int y);
 public:
     void set_selected(bool selected);
-    bool get_selected(void);
+    bool get_selected(void) const;
+    int get_card_id(void) const;
 private:
+    int card_id;
     bool selected;
     static string determine_file_name(int card_id);
 };
+
+typedef vector<Card*> Cards;
 
 class CardGroup: public Grid {
 public:
@@ -25,6 +29,10 @@ public:
 public:
     Card *add_card(int card_id);
     Card *add_card(Card *card);
+    Card *remove_card(int card_id);
+    Card *remove_card(Card *card);
+    Cards get_cards(void) const;
+    Cards get_selecteds(bool selecteds = true) const;
 private:
     CardGroupDirection direction; 
     void inc_col_row(int &col, int &row, SDL_Rect &rect);
