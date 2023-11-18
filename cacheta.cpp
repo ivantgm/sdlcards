@@ -7,7 +7,7 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     group_1->set_xy(0, 100);
     for(int i = 1; i <= 7; i++) {
         for(int j = 1; j <=1; j++) {
-            group_1->add_card(i*10+j);
+            group_1->insert_card(i*10+j, 0);
         }
     }
 
@@ -15,7 +15,7 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     group_2->set_xy(100, 300);
     for(int i = 8; i <= 13; i++) {
         for(int j = 1; j <=4; j++) {
-            group_2->add_card(i*10+j);
+            group_2->insert_card(i*10+j, 0);
         }
     }     
 
@@ -33,9 +33,11 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
         for(int i = 0; i < cards_source.size(); i++) {
             Card *removed_card = group_source->remove_card(cards_source[i]);
             if(removed_card) {
-                group_dest->add_card(removed_card);
+                group_dest->insert_card(removed_card, i); // com zero insere todas no começo e inverte a ordem
+                                                          // com `i` mantem as cartas na ordem original
             }
         }
+        group_dest->select_all(false);
     };
     btn1->on_mouse_click = btn1_click;
 
@@ -53,9 +55,11 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
         for(int i = 0; i < cards_source.size(); i++) {
             Card *removed_card = group_source->remove_card(cards_source[i]);
             if(removed_card) {
-                group_dest->add_card(removed_card);
+                group_dest->insert_card(removed_card, i); // com zero insere todas no começo e inverte a ordem
+                                                          // com `i` mantem as cartas na ordem original
             }
         }
+        group_dest->select_all(false);
     };
     btn2->on_mouse_click = btn2_click;
 
