@@ -86,11 +86,10 @@ void App::poll_event(SDL_Event *e) {
                 case SDL_BUTTON_LEFT: {
                     Render *r = get_render_at(e->button.x, e->button.y);
                     if(r) {
-                        if(e->button.clicks == 1) {
-                            r->mouse_click();
-                        } else if(e->button.clicks == 2) {
+                        if(e->button.clicks == 2) {
                             r->mouse_dclick();
                         }
+                        r->mouse_click();
                     }
                     break;
                 }
