@@ -60,9 +60,9 @@ void App::loop(void) {
             switch(e.type) {
                 case SDL_QUIT:
                     quit = true;
-            }
-            render();
+            }            
         }
+        render();
     }    
 }
 
