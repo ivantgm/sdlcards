@@ -3,63 +3,41 @@
 //-----------------------------------------------------------------------------
 Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
 
-    CardGroup *group_1 = add_card_group(Vertical);    
+    CardGroup *group_1 = add_card_group(Horizontal);    
     group_1->set_xy(0, 100);
-    for(int i = 1; i <= 7; i++) {
+    for(int i = 1; i <= 13; i++) {
         for(int j = 1; j <=1; j++) {
-            group_1->insert_card(i*10+j, 0);
+            group_1->add_card(i*10+j);
         }
-    }
-
-    CardGroup *group_2 = add_card_group(Horizontal);    
-    group_2->set_xy(100, 300);
-    for(int i = 8; i <= 13; i++) {
-        for(int j = 1; j <=4; j++) {
-            group_2->insert_card(i*10+j, 0);
-        }
-    }     
+    }  
 
     Texture *btn1 = add_texture_text(
         "28 Days Later.ttf", 
-        "MOVE BAIXO", 
+        "DIREITA", 
         10, 10, {0x00, 0x00, 0xFF, 0xFF}, 48
     );
     void (*btn1_click)(Render*) = [](Render *r) {
         App *app = r->app;
-        CardGroup *group_source = dynamic_cast<CardGroup*>(app->renders[0]);
-        CardGroup *group_dest = dynamic_cast<CardGroup*>(app->renders[1]);
-
-        Cards cards_source = group_source->get_selecteds();
-        for(int i = 0; i < cards_source.size(); i++) {
-            Card *removed_card = group_source->remove_card(cards_source[i]);
-            if(removed_card) {
-                group_dest->insert_card(removed_card, i); // com zero insere todas no começo e inverte a ordem
-                                                          // com `i` mantem as cartas na ordem original
-            }
+        CardGroup *group = dynamic_cast<CardGroup*>(app->renders[0]);
+        Cards cards = group->get_selecteds();
+        for(int i = 0; i < cards.size(); i++) {
+            cards[i]->inc_rotate(6);
         }
-        group_dest->select_all(false);
     };
     btn1->on_mouse_click = btn1_click;
 
     Texture *btn2 = add_texture_text(
         "28 Days Later.ttf", 
-        "MOVE CIMA", 
+        "ESQUERDA", 
         350, 10, {0xFF, 0x00, 0x00, 0xFF}, 48
     );
     void (*btn2_click)(Render*) = [](Render *r) {
         App *app = r->app;
-        CardGroup *group_source = dynamic_cast<CardGroup*>(app->renders[1]);
-        CardGroup *group_dest = dynamic_cast<CardGroup*>(app->renders[0]);
-
-        Cards cards_source = group_source->get_selecteds();
-        for(int i = 0; i < cards_source.size(); i++) {
-            Card *removed_card = group_source->remove_card(cards_source[i]);
-            if(removed_card) {
-                group_dest->insert_card(removed_card, i); // com zero insere todas no começo e inverte a ordem
-                                                          // com `i` mantem as cartas na ordem original
-            }
+        CardGroup *group = dynamic_cast<CardGroup*>(app->renders[0]);
+        Cards cards = group->get_selecteds();
+        for(int i = 0; i < cards.size(); i++) {
+            cards[i]->inc_rotate(-6);
         }
-        group_dest->select_all(false);
     };
     btn2->on_mouse_click = btn2_click;
 

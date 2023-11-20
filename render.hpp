@@ -71,8 +71,11 @@ public:
     void set_blend(SDL_BlendMode mode);
     void set_alpha(Uint8 alpha);
     void set_color(Uint8 r, Uint8 g, Uint8 b);
+    void rotate(double angle);
+    void inc_rotate(double inc_angle);
 private:
-    SDL_Texture* texture;    
+    SDL_Texture* texture;
+    double rotate_angle;
 };
 
 class Rectangle : public Render {

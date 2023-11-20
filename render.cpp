@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <limits>
+#include <functional>
 
 using namespace std;
 
@@ -98,6 +99,7 @@ void Render::mouse_dclick(void) {
 //-----------------------------------------------------------------------------
 Texture::Texture(App *app, const string& file_name, int x, int y) 
     : Render(app) {    
+    rotate_angle = 0;
     SDL_Surface* temp_surface = IMG_Load(file_name.c_str());
     if(!temp_surface) {
         throw Exception("Não foi possível carregar a imagem " + file_name, IMG_GetError());
@@ -117,6 +119,7 @@ Texture::Texture(App *app,
         const string& ttf_file_name, const string& text,
         int x, int y, const SDL_Color &color, int font_size) 
     : Render(app) {
+    rotate_angle = 0;
     TTF_Font* font = TTF_OpenFont(ttf_file_name.c_str(), font_size);
     if(!font) {
         throw Exception("Não foi possível carregar a fonte " + ttf_file_name, TTF_GetError());    
@@ -143,7 +146,7 @@ Texture::~Texture() {
 
 //-----------------------------------------------------------------------------
 void Texture::render() {
-    SDL_RenderCopy(app->get_window_renderer(), texture, NULL, &rect);
+     SDL_RenderCopyEx(app->get_window_renderer(), texture, NULL, &rect, rotate_angle, NULL, SDL_FLIP_NONE);
 }
 
 //-----------------------------------------------------------------------------
@@ -183,6 +186,15 @@ void Texture::set_alpha(Uint8 alpha) {
 //-----------------------------------------------------------------------------
 void Texture::set_color(Uint8 r, Uint8 g, Uint8 b) {
     SDL_SetTextureColorMod(texture, r, g, b);
+}
+
+//-----------------------------------------------------------------------------
+void Texture::rotate(double angle) {
+    rotate_angle = angle;
+}
+//-----------------------------------------------------------------------------
+void Texture::inc_rotate(double inc_angle) {
+    rotate_angle += inc_angle;
 }
 
 //-----------------------------------------------------------------------------
