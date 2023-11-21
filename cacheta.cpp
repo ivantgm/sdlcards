@@ -19,21 +19,22 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     void (*btn1_click)(Render*) = [](Render *r) {
 
         auto thread_function = [](void *r) {
-            Card *card = (Card*)r;
+            Cards *cards = (Cards*)r;
             double rotate = 0;
-            while(rotate<360) {            
-                card->rotate(rotate += 0.000001f);            
+            while(rotate<360) { 
+                for(int i = 0; i < cards->size(); i++) {
+                    (*cards)[i]->rotate(rotate += 0.000006f);            
+                }                
             }
+            delete cards;
             return 0;
         };
 
         App *app = r->app;
         CardGroup *group = dynamic_cast<CardGroup*>(app->renders[0]);
-        Cards cards = group->get_selecteds();
-        for(int i = 0; i < cards.size(); i++) {
-            SDL_Thread* thread;
-            thread = SDL_CreateThread( thread_function, "LoopThread", (void*)cards[i]);
-        }
+        Cards *cards = new Cards(group->get_selecteds());
+        SDL_Thread* thread;
+        thread = SDL_CreateThread( thread_function, "LoopThread", (void*)cards);
     };
     btn1->on_mouse_click = btn1_click;
 
