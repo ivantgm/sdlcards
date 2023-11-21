@@ -13,33 +13,43 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
 
     Texture *btn1 = add_texture_text(
         "28 Days Later.ttf", 
-        "DIREITA", 
-        10, 10, {0x00, 0x00, 0xFF, 0xFF}, 48
+        "SELECIONE ALGUMAS CARTAS PARA O GIRO 360", 
+        10, 10, {0x00, 0x00, 0xFF, 0xFF}, 36
     );
     void (*btn1_click)(Render*) = [](Render *r) {
+
+        auto thread_function = [](void *r) {
+            Cards *cards = (Cards*)r;
+            double rotate = 0;
+            while(rotate<360) { 
+                for(int i = 0; i < cards->size(); i++) {
+                    (*cards)[i]->rotate(rotate += 0.000006f);            
+                }                
+            }
+            delete cards;
+            return 0;
+        };
+
         App *app = r->app;
         CardGroup *group = dynamic_cast<CardGroup*>(app->renders[0]);
-        Cards cards = group->get_selecteds();
-        for(int i = 0; i < cards.size(); i++) {
-            cards[i]->inc_rotate(6);
-        }
+        Cards *cards = new Cards(group->get_selecteds());
+        SDL_Thread* thread;
+        thread = SDL_CreateThread( thread_function, "LoopThread", (void*)cards);
     };
     btn1->on_mouse_click = btn1_click;
 
-    Texture *btn2 = add_texture_text(
-        "28 Days Later.ttf", 
-        "ESQUERDA", 
-        350, 10, {0xFF, 0x00, 0x00, 0xFF}, 48
-    );
-    void (*btn2_click)(Render*) = [](Render *r) {
-        App *app = r->app;
-        CardGroup *group = dynamic_cast<CardGroup*>(app->renders[0]);
-        Cards cards = group->get_selecteds();
-        for(int i = 0; i < cards.size(); i++) {
-            cards[i]->inc_rotate(-6);
+    
+    auto thread_function = [](void *r) {
+        Card *card = (Card*)r;
+        while(true) {            
+            card->inc_rotate(0.000001f);            
         }
+        return 0;
     };
-    btn2->on_mouse_click = btn2_click;
+
+    Cards cards = group_1->get_cards();
+    SDL_Thread* thread;
+    thread = SDL_CreateThread( thread_function, "CachetaThread", (void*)cards[12]);
 
 }
 
