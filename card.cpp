@@ -217,3 +217,33 @@ void CardGroup::select_all(bool select) {
 }
 
 
+//-----------------------------------------------------------------------------
+//- ThreadRotate360 -----------------------------------------------------------
+//-----------------------------------------------------------------------------
+ThreadRotate360::ThreadRotate360(const Cards &cards) 
+    : Thread("ThreadRotate360", true) {
+    this->cards = new Cards(cards);
+}
+
+//-----------------------------------------------------------------------------
+ThreadRotate360::~ThreadRotate360(void) {
+    delete cards;
+}
+
+//-----------------------------------------------------------------------------
+int ThreadRotate360::on_execute(void) {
+    double rotate = 0;
+    double inc = 6.0f;
+    do { 
+        SDL_Delay(10);
+        for(int i = 0; i < cards->size(); i++) {                    
+            (*cards)[i]->rotate(rotate);            
+        }
+        rotate += inc;                
+    } while (rotate<(360+inc));
+
+    for(int i = 0; i < cards->size(); i++) {                    
+        (*cards)[i]->rotate(0);            
+    }            
+    return 0;
+}
