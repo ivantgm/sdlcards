@@ -27,7 +27,7 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     void (*btn1_click)(Render*) = [](Render *r) {
         App *app = r->app;
         CardGroup *group_1 = dynamic_cast<CardGroup*>(app->renders[0]);
-        ThreadRotate360 *thread = new ThreadRotate360(group_1->get_selecteds());
+        ThreadRotate360 *thread = new ThreadRotate360(group_1->get_selecteds(), 10000);
         thread->execute();
     };
     btn1->on_mouse_click = btn1_click;

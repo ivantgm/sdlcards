@@ -45,12 +45,13 @@ private:
 
 class ThreadRotate360: public Thread {
 public:
-    ThreadRotate360(const Cards &cards);
+    ThreadRotate360(const Cards &cards, int duration_miliseconds);
     ~ThreadRotate360(void);
 protected:
     int on_execute(void);
 private:
-    Cards *cards;    
+    Cards *cards; 
+    int duration_miliseconds;   
 };
 
 #endif
