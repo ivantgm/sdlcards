@@ -6,8 +6,16 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     CardGroup *group_1 = add_card_group(Horizontal);    
     group_1->set_xy(0, 100);
     for(int i = 1; i <= 13; i++) {
-        for(int j = 1; j <=1; j++) {
+        for(int j = 1; j <=2; j++) {
             group_1->add_card(i*10+j);
+        }
+    }  
+
+    CardGroup *group_2 = add_card_group(Horizontal);    
+    group_2->set_xy(0, 300);
+    for(int i = 1; i <= 13; i++) {
+        for(int j = 2; j <=4; j++) {
+            group_2->add_card(i*10+j);
         }
     }  
 
@@ -17,39 +25,15 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
         10, 10, {0x00, 0x00, 0xFF, 0xFF}, 36
     );
     void (*btn1_click)(Render*) = [](Render *r) {
-
-        auto thread_function = [](void *r) {
-            Cards *cards = (Cards*)r;
-            double rotate = 0;
-            while(rotate<360) { 
-                for(int i = 0; i < cards->size(); i++) {
-                    (*cards)[i]->rotate(rotate += 0.000006f);            
-                }                
-            }
-            delete cards;
-            return 0;
-        };
-
         App *app = r->app;
-        CardGroup *group = dynamic_cast<CardGroup*>(app->renders[0]);
-        Cards *cards = new Cards(group->get_selecteds());
-        SDL_Thread* thread;
-        thread = SDL_CreateThread( thread_function, "LoopThread", (void*)cards);
+        CardGroup *group_1 = dynamic_cast<CardGroup*>(app->renders[0]);
+        ThreadRotate360 *thread = new ThreadRotate360(group_1->get_selecteds());
+        thread->execute();
     };
     btn1->on_mouse_click = btn1_click;
 
     
-    auto thread_function = [](void *r) {
-        Card *card = (Card*)r;
-        while(true) {            
-            card->inc_rotate(0.000001f);            
-        }
-        return 0;
-    };
 
-    Cards cards = group_1->get_cards();
-    SDL_Thread* thread;
-    thread = SDL_CreateThread( thread_function, "CachetaThread", (void*)cards[12]);
 
 }
 

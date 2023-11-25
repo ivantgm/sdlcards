@@ -2,6 +2,7 @@
 #define __GAME_CARD__
 
 #include "render.hpp"
+#include "thread.hpp"
 
 enum CardGroupDirection {
     Vertical,
@@ -40,6 +41,16 @@ private:
     CardGroupDirection direction; 
     void inc_col_row(int &col, int &row, SDL_Rect &rect);
     Card *add(Card *card, int col, int row);
+};
+
+class ThreadRotate360: public Thread {
+public:
+    ThreadRotate360(const Cards &cards);
+    ~ThreadRotate360(void);
+protected:
+    int on_execute(void);
+private:
+    Cards *cards;    
 };
 
 #endif

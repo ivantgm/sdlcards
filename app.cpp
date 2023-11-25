@@ -29,7 +29,7 @@ App::App(const string& window_caption, int width, int heigth) {
     if(TTF_Init() == -1) {
         throw Exception("SDL_ttf não inicializou", TTF_GetError());
     }    
-    window_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    window_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if(!window_renderer) {
         throw Exception("Não foi possível criar o renderizador da janela", SDL_GetError());
     }  
@@ -60,9 +60,9 @@ void App::loop(void) {
             switch(e.type) {
                 case SDL_QUIT:
                     quit = true;
-            }            
+            }  
         }
-        render();
+        render();        
     }    
 }
 
