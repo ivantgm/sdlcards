@@ -11,6 +11,7 @@ public:
     void execute(void);
 protected:
     virtual int on_execute(void);
+    virtual void on_terminate(void);
 private:
     string name;
     bool auto_free;
