@@ -235,19 +235,39 @@ ThreadRotate360::~ThreadRotate360(void) {
 int ThreadRotate360::on_execute(void) {
     const int delay = 10;
     const double final_rotate = 360;
-    int steps = ceil((double)duration_miliseconds/(double)delay);    
-    double inc = final_rotate/steps;
-    double rotate = 0;
-    do { 
-        SDL_Delay(delay);
-        for(int i = 0; i < cards->size(); i++) {                    
-            (*cards)[i]->rotate(rotate);            
-        }
-        rotate += inc;                
-    } while (rotate<(final_rotate+inc));
+    const double mid_rotate = final_rotate/2;
+    const double power = 3;
+    int steps = ceil((double)duration_miliseconds/(double)delay);
+    int mid_steps = steps/2+steps%2;
+    if(!steps) {
+        return 0;
+    }
 
+    vector<double>progress;
+    double value = 0;
+    for(int i = 0; i < mid_steps; i++) {
+        value += pow(i+1, power);
+        progress.push_back(value);
+    }
+    for(int i = steps-1; i >= mid_steps; i--) {
+        value += pow((i-mid_steps)+1, power);
+        progress.push_back(value);
+    }    
+
+    for(int i = 0; i < steps; i++) {
+        double rotate = final_rotate/value*progress[i];
+        SDL_Delay(delay);
+        for(int j = 0; j < cards->size(); j++) {                    
+            (*cards)[j]->rotate(rotate);            
+        }        
+    }
     for(int i = 0; i < cards->size(); i++) {                    
         (*cards)[i]->rotate(0);            
-    }            
+    } 
+
+        
     return 0;
 }
+
+
+
