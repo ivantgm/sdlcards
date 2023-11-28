@@ -14,7 +14,7 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     CardGroup *group_2 = add_card_group(Horizontal);    
     group_2->set_xy(0, 300);
     for(int i = 1; i <= 13; i++) {
-        for(int j = 2; j <=4; j++) {
+        for(int j = 3; j <=4; j++) {
             group_2->add_card(i*10+j);
         }
     }  
@@ -27,8 +27,8 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
     void (*btn1_click)(Render*) = [](Render *r) {
         App *app = r->app;
         CardGroup *group_1 = dynamic_cast<CardGroup*>(app->renders[0]);
-        ThreadRotate360 *thread = new ThreadRotate360(group_1->get_selecteds(), 1500);
-        thread->execute();
+        CardGroup *group_2 = dynamic_cast<CardGroup*>(app->renders[1]);
+        group_1->move_cards(group_1->get_selecteds(), group_2, 0);
     };
     btn1->on_mouse_click = btn1_click;
 

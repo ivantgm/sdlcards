@@ -215,6 +215,15 @@ void CardGroup::select_all(bool select) {
         }
     }
 }
+//-----------------------------------------------------------------------------
+void CardGroup::move_cards(const Cards &cards, CardGroup *source_group, int index) {
+    for (Cards::const_reverse_iterator i = cards.rbegin(); i != cards.rend(); i++) {
+        remove_card(*i);
+        source_group->insert_card(*i, index);
+    }
+    ThreadRotate360 *thread = new ThreadRotate360(cards, 1500);
+    thread->execute();    
+}
 
 
 //-----------------------------------------------------------------------------

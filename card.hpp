@@ -37,6 +37,7 @@ public:
     Cards get_cards(void) const;
     Cards get_selecteds(bool selecteds = true) const;
     void select_all(bool select = true);
+    void move_cards(const Cards &cards, CardGroup *source_group, int index);
 private:
     CardGroupDirection direction; 
     void inc_col_row(int &col, int &row, SDL_Rect &rect);
