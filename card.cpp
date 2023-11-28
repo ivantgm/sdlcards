@@ -235,7 +235,6 @@ ThreadRotate360::~ThreadRotate360(void) {
 int ThreadRotate360::on_execute(void) {
     const int delay = 10;
     const double final_rotate = 360;
-    const double mid_rotate = final_rotate/2;
     const double power = 3;
     int steps = ceil((double)duration_miliseconds/(double)delay);
     int mid_steps = steps/2+steps%2;
