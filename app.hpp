@@ -10,6 +10,14 @@
 
 using namespace std;
 
+class Animate {
+public:
+    Card *card;
+    int orig_x, orig_y, dest_x, dest_y;
+};
+
+typedef vector<Animate> Animates;
+
 class App {
 public:
     App(const string& window_caption, int width, int heigth);
@@ -21,6 +29,11 @@ public:
     void loop(void);
     virtual void poll_event(SDL_Event *e);
     void screen_shot(void);
+public:    
+    void begin_animate(void);
+    void end_animate(void);
+    bool is_animate(void) const;
+    void add_animate(Card *card, int x, int y);
 protected:       
     Texture *add_texture(const string& file_name, int x, int y);
     Texture *add_texture_text(const string& ttf_file_name, const string& text,
@@ -47,6 +60,9 @@ private:
     SDL_Renderer* window_renderer;
     int width;
     int heigth;
+private:
+    int animate_stack;
+    Animates animates;
 private:
     void render_renders(void);
     void delete_renders(void);

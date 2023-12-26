@@ -13,9 +13,12 @@ class Card: public Texture {
 public:
     Card(App *app, int card_id, int x, int y);
 public:
+    bool animated;
     void set_selected(bool selected);
     bool get_selected(void) const;
     int get_card_id(void) const;
+    void set_xy_animate(int x, int y);
+    void set_xy(int x, int y);
 private:
     int card_id;
     bool selected;
@@ -47,12 +50,25 @@ private:
 class ThreadRotate360: public Thread {
 public:
     ThreadRotate360(const Cards &cards, int duration_miliseconds);
+    ThreadRotate360(Card *card, int duration_miliseconds);
     ~ThreadRotate360(void);
 protected:
     int on_execute(void);
 private:
     Cards *cards; 
     int duration_miliseconds;   
+};
+
+class ThreadMove: public Thread {
+public:
+    ThreadMove(Card *card, int duration_miliseconds, int x, int y);
+protected:
+    int on_execute(void);
+    void on_terminate(void);
+private:
+    Card *card; 
+    int duration_miliseconds;   
+    int xf, yf, xi, yi;
 };
 
 #endif

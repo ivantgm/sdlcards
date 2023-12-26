@@ -7,7 +7,8 @@
 App::App(const string& window_caption, int width, int heigth) {
     window = NULL;
     this->width = width;
-    this->heigth = heigth;    
+    this->heigth = heigth;
+    animate_stack = 0;    
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
         throw Exception("SDL não inicializou", SDL_GetError());            
     } 
@@ -236,4 +237,45 @@ Render *App::get_render_at(int x, int y) {
         }        
     }
     return nullptr;
+}
+
+//-----------------------------------------------------------------------------
+void App::begin_animate(void) {
+    animate_stack++;
+}
+
+//-----------------------------------------------------------------------------
+void App::end_animate(void) {
+    animate_stack--;
+    if(!is_animate()) {
+        for (auto &i : animates) {
+            i.card->set_xy_animate(i.dest_x, i.dest_y);
+        }
+        animates.clear();
+    }
+}
+
+//-----------------------------------------------------------------------------
+bool App::is_animate(void) const {
+    return animate_stack;
+}
+
+//-----------------------------------------------------------------------------
+void App::add_animate(Card *card, int x, int y) {
+    for (auto &i : animates) {
+        if(i.card == card) {
+            i.dest_x = x;
+            i.dest_y = y;
+            return;
+        }
+    }
+    Animate animate;
+    SDL_Rect rect;
+    card->get_rect(rect);
+    animate.card = card;
+    animate.orig_x = rect.x;
+    animate.orig_y = rect.y;
+    animate.dest_x = x;
+    animate.dest_y = y;
+    animates.push_back(animate);
 }

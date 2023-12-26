@@ -35,7 +35,7 @@ public:
     virtual void set_y(int y) = 0;
     virtual void move(int x, int y) = 0;
     virtual void get_rect(SDL_Rect &rect) const = 0;
-    void set_xy(int x, int y);
+    virtual void set_xy(int x, int y);
     void get_inflate_rect(SDL_Rect &rect, int amount) const;
     const Renders& get_renders() const;
     bool rect_contains(int x, int y) const;

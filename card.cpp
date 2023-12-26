@@ -1,4 +1,5 @@
 #include "card.hpp"
+#include "app.hpp"
 
 //-----------------------------------------------------------------------------
 Card::Card(App *app, int card_id, int x, int y) 
@@ -12,6 +13,7 @@ Card::Card(App *app, int card_id, int x, int y)
     };
     this->card_id = card_id;
     on_mouse_click = event_click;
+    animated = false;
     set_selected(false);
 }
 
@@ -42,7 +44,27 @@ int Card::get_card_id(void) const {
     return card_id;
 }
 
+//-----------------------------------------------------------------------------
+void Card::set_xy_animate(int x, int y) {
+    if(animated) {
+        ThreadMove *move = new ThreadMove(this, 250, x, y);
+        move->execute(); 
+        ThreadRotate360 *rotate = new ThreadRotate360(this, 250);
+        rotate->execute();
+        animated = false;
+    } else {
+        set_xy(x, y);
+    }
+}
 
+//-----------------------------------------------------------------------------
+void Card::set_xy(int x, int y) {
+    if (!app->is_animate()) {
+        Render::set_xy(x, y);
+    } else {
+        app->add_animate(this, x, y);
+    }  
+}
 
 //-----------------------------------------------------------------------------
 //- CardGroup -----------------------------------------------------------------
@@ -216,13 +238,14 @@ void CardGroup::select_all(bool select) {
     }
 }
 //-----------------------------------------------------------------------------
-void CardGroup::move_cards(const Cards &cards, CardGroup *source_group, int index) {
-    for (Cards::const_reverse_iterator i = cards.rbegin(); i != cards.rend(); i++) {
+void CardGroup::move_cards(const Cards &cards, CardGroup *source_group, int index) {    
+    app->begin_animate();
+    for (Cards::const_iterator i = cards.begin(); i != cards.end(); i++) {
         remove_card(*i);
-        source_group->insert_card(*i, index);
-    }
-    ThreadRotate360 *thread = new ThreadRotate360(cards, 1500);
-    thread->execute();    
+        (*i)->animated = true;
+        source_group->insert_card(*i, index++);        
+    } 
+    app->end_animate();  
 }
 
 
@@ -234,6 +257,13 @@ ThreadRotate360::ThreadRotate360(const Cards &cards, int duration_miliseconds)
     this->cards = new Cards(cards);
     this->duration_miliseconds = duration_miliseconds;
 }
+//-----------------------------------------------------------------------------
+ThreadRotate360::ThreadRotate360(Card *card, int duration_miliseconds)
+    : Thread("ThreadRotate360", true) {
+    this->cards = new Cards();
+    this->cards->push_back(card);
+    this->duration_miliseconds = duration_miliseconds;
+}
 
 //-----------------------------------------------------------------------------
 ThreadRotate360::~ThreadRotate360(void) {
@@ -243,8 +273,8 @@ ThreadRotate360::~ThreadRotate360(void) {
 //-----------------------------------------------------------------------------
 int ThreadRotate360::on_execute(void) {
     const int delay = 10;
-    const double final_rotate = 360;
-    const double power = 3;
+    const double final_rotate = 180;
+    const double power = 2;
     int steps = ceil((double)duration_miliseconds/(double)delay);
     int mid_steps = steps/2+steps%2;
     if(!steps) {
@@ -277,5 +307,57 @@ int ThreadRotate360::on_execute(void) {
     return 0;
 }
 
+//-----------------------------------------------------------------------------
+//- ThreadMove ----------------------------------------------------------------
+//-----------------------------------------------------------------------------
+ThreadMove::ThreadMove(Card *card, int duration_miliseconds, int x, int y) 
+    : Thread("ThreadMove", true) {
+    this->card = card;
+    this->duration_miliseconds = duration_miliseconds;
+    SDL_Rect rect;
+    card->get_rect(rect);
+    this->xi = rect.x;
+    this->yi = rect.y;
+    this->xf = x;
+    this->yf = y;
+}
 
+//-----------------------------------------------------------------------------
+int ThreadMove::on_execute(void) {
+    const int delay = 10;
+    const double x_e = xf - xi;
+    const double y_e = yf - yi;
+    const double power = 2;
+    int steps = ceil((double)duration_miliseconds/(double)delay);
+    int mid_steps = steps/2+steps%2;
+    if(!steps) {
+        return 0;
+    }
+
+    vector<double>progress;
+    double value = 0;
+    for(int i = 0; i < mid_steps; i++) {
+        value += pow(i+1, power);
+        progress.push_back(value);
+    }
+    for(int i = steps-1; i >= mid_steps; i--) {
+        value += pow((i-mid_steps)+1, power);
+        progress.push_back(value);
+    }    
+
+    for(int i = 0; i < steps; i++) {
+        double x = x_e/value*progress[i];
+        double y = y_e/value*progress[i];
+        SDL_Delay(delay);
+        card->set_xy(ceil(x)+xi, ceil(y)+yi);      
+    }
+
+        
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+void ThreadMove::on_terminate(void) {
+    card->set_xy(xf, yf);
+}
 
