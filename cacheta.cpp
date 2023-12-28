@@ -55,7 +55,7 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
             if(i->get_card_id()) {
                 i->set_card_id(0);    
             } else {
-                i->set_card_id((rand()%13+1)*10 + (rand()%4+1));
+                i->set_card_id((rand()%13+1)*10 + (rand()%4+1)); // sorteando
             }
             i->set_selected(false);            
         }
