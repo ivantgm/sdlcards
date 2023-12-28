@@ -17,6 +17,7 @@ public:
     void set_selected(bool selected);
     bool get_selected(void) const;
     int get_card_id(void) const;
+    void set_card_id(int card_id);
     void set_xy_animate(int x, int y);
     void set_xy(int x, int y);
 private:
