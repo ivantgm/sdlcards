@@ -45,6 +45,13 @@ int Card::get_card_id(void) const {
 }
 
 //-----------------------------------------------------------------------------
+void Card::set_card_id(int card_id) {
+    change_image(determine_file_name(card_id));
+    set_selected(get_selected());
+    this->card_id = card_id;
+}
+
+//-----------------------------------------------------------------------------
 void Card::set_xy_animate(int x, int y) {
     if(animated) {
         ThreadMove *move = new ThreadMove(this, 250, x, y);

@@ -73,6 +73,7 @@ public:
     void set_color(Uint8 r, Uint8 g, Uint8 b);
     void rotate(double angle);
     void inc_rotate(double inc_angle);
+    void change_image(const string& file_name);
 private:
     SDL_Texture* texture;
     double rotate_angle;

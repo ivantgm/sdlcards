@@ -196,6 +196,25 @@ void Texture::rotate(double angle) {
 void Texture::inc_rotate(double inc_angle) {
     rotate_angle += inc_angle;
 }
+//-----------------------------------------------------------------------------
+void Texture::change_image(const string& file_name) {
+    SDL_Surface* temp_surface = IMG_Load(file_name.c_str());
+    if(!temp_surface) {
+        throw Exception("Não foi possível carregar a imagem " + file_name, IMG_GetError());
+    }
+    SDL_Rect temp_rect;
+    get_rect(temp_rect);
+    SDL_GetClipRect(temp_surface, &rect);
+    rect.x = temp_rect.x;
+    rect.y = temp_rect.y;
+
+    SDL_DestroyTexture(texture);
+    texture = SDL_CreateTextureFromSurface(app->get_window_renderer(), temp_surface);
+    if(!texture) {
+        throw Exception("Não foi possível criar a textura " + file_name, SDL_GetError());
+    }
+    SDL_FreeSurface(temp_surface);    
+}
 
 //-----------------------------------------------------------------------------
 //- Rectangle -----------------------------------------------------------------
