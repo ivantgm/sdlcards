@@ -8,13 +8,16 @@ Card::Card(App *app, int card_id, int x, int y)
     void (*event_click)(Render*) = [](Render *r) {
         Card *c = dynamic_cast<Card*>(r);
         if(c) {            
-            c->set_selected(!c->get_selected());
+            if(c->get_enabled()) {
+                c->set_selected(!c->get_selected());
+            }            
         }
     };
     this->card_id = card_id;
     on_mouse_click = event_click;
-    animated = false;
-    set_selected(false);
+    set_animated(false);
+    set_enabled(true);
+    set_selected(false);    
 }
 
 //-----------------------------------------------------------------------------
@@ -22,6 +25,31 @@ string Card::determine_file_name(int card_id) {
     char s[32];
     sprintf(s, "%03d", card_id);
     return "./img/120x180/" + string(s) + ".png";
+}
+
+//-----------------------------------------------------------------------------
+int Card::rand_card_id(void) {
+    return (rand()%13+1)*10 + (rand()%4+1);
+}
+
+//-----------------------------------------------------------------------------
+void Card::set_animated(bool animated) {
+    this->animated = animated;
+}
+
+//-----------------------------------------------------------------------------
+bool Card::get_animated(void) const {
+    return animated;
+}
+
+//-----------------------------------------------------------------------------
+void Card::set_enabled(bool enabled) {
+    this->enabled = enabled;
+}
+
+//-----------------------------------------------------------------------------
+bool Card::get_enabled(void) const {
+    return enabled;
 }
 
 //-----------------------------------------------------------------------------
@@ -249,7 +277,7 @@ void CardGroup::move_cards(const Cards &cards, CardGroup *source_group, int inde
     app->begin_animate();
     for (Cards::const_iterator i = cards.begin(); i != cards.end(); i++) {
         remove_card(*i);
-        (*i)->animated = true;
+        (*i)->set_animated(true);
         source_group->insert_card(*i, index++);        
     } 
     app->end_animate();  
