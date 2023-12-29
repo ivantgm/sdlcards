@@ -14,6 +14,11 @@ Card::Card(App *app, int card_id, int x, int y)
         }
     };
     this->card_id = card_id;
+    if(card_id) {
+        card_face = FACE_UP;
+    } else {
+        card_face = FACE_DOWN;
+    }
     on_mouse_click = event_click;
     set_animated(false);
     set_enabled(true);
@@ -41,6 +46,24 @@ void Card::set_animated(bool animated) {
 bool Card::get_animated(void) const {
     return animated;
 }
+
+//-----------------------------------------------------------------------------
+void Card::set_card_face(CardFace card_face) {
+    if(get_card_id()) {
+        if(card_face == FACE_DOWN) {
+            change_image(determine_file_name(0));
+        } else {
+            change_image(determine_file_name(get_card_id()));
+        }        
+        this->card_face = card_face;
+    }    
+}
+
+//-----------------------------------------------------------------------------
+CardFace Card::get_card_face(void) const {
+    return card_face;
+}
+
 
 //-----------------------------------------------------------------------------
 void Card::set_enabled(bool enabled) {
@@ -77,6 +100,11 @@ void Card::set_card_id(int card_id) {
     change_image(determine_file_name(card_id));
     set_selected(get_selected());
     this->card_id = card_id;
+    if(card_id) {
+        card_face = FACE_UP;
+    } else {
+        card_face = FACE_DOWN;
+    }    
 }
 
 //-----------------------------------------------------------------------------

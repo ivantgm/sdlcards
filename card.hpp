@@ -9,12 +9,19 @@ enum CardGroupDirection {
     Horizontal
 };
 
+enum CardFace {
+    FACE_UP,
+    FACE_DOWN
+};
+
 class Card: public Texture {
 public:
     Card(App *app, int card_id, int x, int y);
 public:    
     void set_animated(bool animated);
     bool get_animated(void) const;
+    void set_card_face(CardFace card_face);
+    CardFace get_card_face(void) const;
     void set_enabled(bool enabled);
     bool get_enabled(void) const;
     void set_selected(bool selected);
@@ -28,8 +35,9 @@ public:
 private:
     int card_id;
     bool animated;
+    CardFace card_face;
     bool enabled;
-    bool selected;
+    bool selected;    
     static string determine_file_name(int card_id);
 };
 
