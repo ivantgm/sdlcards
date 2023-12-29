@@ -38,7 +38,13 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
         App *app = r->app;
         CardGroup *group_1 = dynamic_cast<CardGroup*>(app->renders[1]);
         CardGroup *group_2 = dynamic_cast<CardGroup*>(app->renders[0]);
-        group_1->move_cards(group_1->get_selecteds(), group_2, 0);
+        Cards cards = group_1->get_selecteds();
+        for (auto i: cards) {
+            i->set_enabled(false);
+            i->set_selected(false);
+        }        
+        group_1->move_cards(cards, group_2, 0);
+
     };
     btn2->on_mouse_click = btn2_click;
 
@@ -55,7 +61,7 @@ Cacheta::Cacheta() : App("Cacheta 1.0", 800, 600) {
             if(i->get_card_id()) {
                 i->set_card_id(0);    
             } else {
-                i->set_card_id((rand()%13+1)*10 + (rand()%4+1)); // sorteando
+                i->set_card_id(Card::rand_card_id());
             }
             i->set_selected(false);            
         }

@@ -12,16 +12,23 @@ enum CardGroupDirection {
 class Card: public Texture {
 public:
     Card(App *app, int card_id, int x, int y);
-public:
-    bool animated;
+public:    
+    void set_animated(bool animated);
+    bool get_animated(void) const;
+    void set_enabled(bool enabled);
+    bool get_enabled(void) const;
     void set_selected(bool selected);
     bool get_selected(void) const;
     int get_card_id(void) const;
     void set_card_id(int card_id);
     void set_xy_animate(int x, int y);
     void set_xy(int x, int y);
+public:
+    static int rand_card_id(void);
 private:
     int card_id;
+    bool animated;
+    bool enabled;
     bool selected;
     static string determine_file_name(int card_id);
 };
