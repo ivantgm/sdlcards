@@ -1,14 +1,16 @@
 #include "paciencia.hpp"
 
 //-----------------------------------------------------------------------------
-Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {    
+Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {
+
+    
     
     //====================
     void (*monte_click)(Render*) = [](Render *r) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
         paciencia->pega_monte();
     };
-    Card *monte = add_card(0, 16 + 136*0, 16);
+    Card *monte = add_card(0, calc_col_x(1), calc_row_y(1));
     monte->set_enabled(false);
     monte->on_mouse_click = monte_click;
     
@@ -17,7 +19,7 @@ Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
         paciencia->casa_ouros();
     };
-    Card *casa_ouros = add_card(11, 16 + 136*1, 16);
+    Card *casa_ouros = add_card(11, calc_col_x(2), calc_row_y(1));
     casa_ouros->set_alpha(32);
     casa_ouros->set_enabled(false);
     casa_ouros->on_mouse_click = casa_ouros_click;
@@ -27,7 +29,7 @@ Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
         paciencia->casa_espadas();
     };
-    Card *casa_espadas = add_card(12, 16 + 136*2, 16);
+    Card *casa_espadas = add_card(12, calc_col_x(3), calc_row_y(1));
     casa_espadas->set_alpha(32);
     casa_espadas->set_enabled(false);
     casa_espadas->on_mouse_click = casa_espadas_click;
@@ -37,7 +39,7 @@ Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
         paciencia->casa_copas();
     };
-    Card *casa_copas = add_card(13, 16 + 136*3, 16);
+    Card *casa_copas = add_card(13, calc_col_x(4), calc_row_y(1));
     casa_copas->set_alpha(32);
     casa_copas->set_enabled(false);
     casa_copas->on_mouse_click = casa_copas_click;
@@ -47,62 +49,21 @@ Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
         paciencia->casa_paus();
     };
-    Card *casa_paus = add_card(14, 16 + 136*4, 16);
+    Card *casa_paus = add_card(14, calc_col_x(5), calc_row_y(1));
     casa_paus->set_alpha(32);
     casa_paus->set_enabled(false);
     casa_paus->on_mouse_click = casa_paus_click;
 
-    //====================
-    CardGroup *coluna_1 = add_card_group(Vertical);    
-    coluna_1->set_xy(16 + 136*0, 210); 
-    coluna_1->add_card(0);
-    coluna_1->add_card(Card::rand_card_id());
 
     //====================
-    CardGroup *coluna_2 = add_card_group(Vertical);    
-    coluna_2->set_xy(16 + 136*1, 210); 
-    coluna_2->add_card(0);
-    coluna_2->add_card(0);
-    coluna_2->add_card(Card::rand_card_id());
-    coluna_2->add_card(Card::rand_card_id());
+    //====================
+
+    for (int i = 1; i <= 7; i++) {
+        create_col(i);
+    }
 
     //====================
-    CardGroup *coluna_3 = add_card_group(Vertical);    
-    coluna_3->set_xy(16 + 136*2, 210); 
-    coluna_3->add_card(0);
-    coluna_3->add_card(0);
-    coluna_3->add_card(0);
-    coluna_3->add_card(Card::rand_card_id());
-    coluna_3->add_card(Card::rand_card_id());
-    coluna_3->add_card(Card::rand_card_id());
-    
     //====================
-    CardGroup *coluna_4 = add_card_group(Vertical);    
-    coluna_4->set_xy(16 + 136*3, 210); 
-    coluna_4->add_card(0);
-    coluna_4->add_card(0);
-    coluna_4->add_card(0);
-    coluna_4->add_card(0);
-    coluna_4->add_card(Card::rand_card_id());
-    coluna_4->add_card(Card::rand_card_id());
-    coluna_4->add_card(Card::rand_card_id());
-    coluna_4->add_card(Card::rand_card_id());
-
-    //====================
-    CardGroup *coluna_5 = add_card_group(Vertical);    
-    coluna_5->set_xy(16 + 136*4, 210); 
-    coluna_5->add_card(0);
-    coluna_5->add_card(0);
-    coluna_5->add_card(0);
-    coluna_5->add_card(0);
-    coluna_5->add_card(0);
-    coluna_5->add_card(Card::rand_card_id());
-    coluna_5->add_card(Card::rand_card_id());
-    coluna_5->add_card(Card::rand_card_id());
-    coluna_5->add_card(Card::rand_card_id());
-    coluna_5->add_card(Card::rand_card_id());
-
-
 
 }
 
@@ -152,4 +113,23 @@ void Paciencia::casa_paus(void) {
 
 }
 
+//-----------------------------------------------------------------------------
+int Paciencia::calc_col_x(int col) const {
+    return (dist*col) + (cw*(col-1));
+}
 
+//-----------------------------------------------------------------------------
+int Paciencia::calc_row_y(int row) const {
+    return (dist*row) + (ch*(row-1));
+}
+
+//-----------------------------------------------------------------------------
+CardGroup *Paciencia::create_col(int col) {
+    CardGroup *group = add_card_group(Vertical);    
+    group->set_xy(calc_col_x(col), calc_row_y(2)); 
+    for (int i = 1; i <= col; i++) {
+        group->add_card(0);
+    }    
+    group->add_card(Card::rand_card_id()); 
+    return group;   
+}

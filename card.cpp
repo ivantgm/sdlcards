@@ -29,7 +29,7 @@ Card::Card(App *app, int card_id, int x, int y)
 string Card::determine_file_name(int card_id) {
     char s[32];
     sprintf(s, "%03d", card_id);
-    return "./img/120x180/" + string(s) + ".png";
+    return "./img/100x150/" + string(s) + ".png";
 }
 
 //-----------------------------------------------------------------------------
