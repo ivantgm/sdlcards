@@ -132,6 +132,11 @@ void Card::set_xy(int x, int y) {
 //-----------------------------------------------------------------------------
 //- CardGroup -----------------------------------------------------------------
 //-----------------------------------------------------------------------------
+CardGroup::CardGroup(App *app) 
+    : Grid(app, 0, 0, 0, 0, 0, 0, 0, 0, SDL_Color()) {
+    this->direction = Vertical;
+}
+//-----------------------------------------------------------------------------
 CardGroup::CardGroup(App *app, CardGroupDirection direction) 
     : Grid(app, 0, 0, 18, 24, 0, 0, 0, 0, SDL_Color()) {
     this->direction = direction;

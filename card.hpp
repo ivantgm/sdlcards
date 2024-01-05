@@ -45,7 +45,8 @@ typedef vector<Card*> Cards;
 
 class CardGroup: public Grid {
 public:
-    CardGroup(App *app, CardGroupDirection direction);
+    CardGroup(App *app);
+    CardGroup(App *app, CardGroupDirection direction);    
 public:
     Card *add_card(int card_id);
     Card *add_card(Card *card);
