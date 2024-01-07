@@ -14,6 +14,13 @@ enum CardFace {
     FACE_DOWN
 };
 
+enum Naipe {
+    OUROS = 1,
+    ESPADAS = 2,
+    COPAS = 3,
+    PAUS = 4
+};
+
 class Card: public Texture {
 public:
     Card(App *app, int card_id, int x, int y);
@@ -30,8 +37,15 @@ public:
     void set_card_id(int card_id);
     void set_xy_animate(int x, int y);
     void set_xy(int x, int y);
+    bool ouros(void) const;
+    bool espadas(void) const;
+    bool copas(void) const;
+    bool paus(void) const;
+    bool naipe(Naipe naipe) const;
 public:
     static int rand_card_id(void);
+protected:
+    virtual void before_select(bool &can_select);    
 private:
     int card_id;
     bool animated;

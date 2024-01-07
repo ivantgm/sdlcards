@@ -7,10 +7,14 @@ Card::Card(App *app, int card_id, int x, int y)
     
     void (*event_click)(Render*) = [](Render *r) {
         Card *c = dynamic_cast<Card*>(r);
-        if(c) {            
-            if(c->get_enabled()) {
-                c->set_selected(!c->get_selected());
-            }            
+        if(c) {
+            bool can_select;            
+            c->before_select(can_select);
+            if(can_select) {
+                if(c->get_enabled()) {
+                    c->set_selected(!c->get_selected());
+                }
+            }
         }
     };
     this->card_id = card_id;
@@ -127,6 +131,41 @@ void Card::set_xy(int x, int y) {
     } else {
         app->add_animate(this, x, y);
     }  
+}
+
+//-----------------------------------------------------------------------------
+void Card::before_select(bool &can_select) {
+    can_select = true;
+}
+
+//-----------------------------------------------------------------------------
+bool Card::ouros(void) const {
+    return naipe(OUROS);
+}
+
+//-----------------------------------------------------------------------------
+bool Card::espadas(void) const {
+    return naipe(ESPADAS);
+}
+
+//-----------------------------------------------------------------------------
+bool Card::copas(void) const {
+    return naipe(COPAS);
+}
+
+//-----------------------------------------------------------------------------
+bool Card::paus(void) const {
+    return naipe(PAUS);
+}
+
+//-----------------------------------------------------------------------------
+bool Card::naipe(Naipe naipe) const {
+    int id = get_card_id();
+    if(id) {
+        return (id%10)==naipe;
+    } else {
+        return false;
+    }
 }
 
 //-----------------------------------------------------------------------------
