@@ -29,6 +29,7 @@ public:
 public:
     App *app;
     Render *owner;
+    Render *link;
     SDL_Color color;
     virtual void render(void) = 0;
     virtual void set_x(int x) = 0;

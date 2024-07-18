@@ -24,6 +24,7 @@ Render::Render(App *app) {
     on_mouse_click = nullptr;
     on_mouse_dclick = nullptr;
     owner = nullptr;
+    link = nullptr;
     this->app = app;
 }
 

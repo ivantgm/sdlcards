@@ -10,7 +10,7 @@
                 "main.cpp",
                 "exception.cpp",
                 "app.cpp",
-                "cacheta.cpp",
+                "paciencia.cpp",
                 "render.cpp",
                 "card.cpp",
                 "thread.cpp",
