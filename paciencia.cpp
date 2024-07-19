@@ -3,13 +3,44 @@
 
 //-----------------------------------------------------------------------------
 Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {    
+    
+    new_game();    
+
+}
+
+//-----------------------------------------------------------------------------
+Paciencia::~Paciencia() {
+
+}
+
+//-----------------------------------------------------------------------------
+void Paciencia::new_game(void) {
+    
+    cols.clear();
+    baralho.clear();
 
     for(int v = 13; v >= 1; v--) {
         for(int n = 1; n <= 4; n++) {
             baralho.push_back(v*10+n);
         }
     }
-    
+    srand(2);
+    random_shuffle(baralho.begin(), baralho.end());    
+
+    delete_renders();
+
+    Texture *button = add_texture_text( 
+            "./28 Days Later.ttf", 
+            "retry",
+            600, 10, 
+            {200, 200, 200},
+            52
+    );
+    button->on_mouse_click = [](Render *r) {
+        Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
+        paciencia->new_game();
+    };    
+
     for (int i = 1; i <= 7; i++) {
         create_col(i);
     }
@@ -74,12 +105,6 @@ Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {
     casa_paus_ghost->set_alpha(32);
     casa_paus_ghost->set_enabled(false);
     casa_paus_ghost->on_mouse_click = casa_paus_click;
-
-
-}
-
-//-----------------------------------------------------------------------------
-Paciencia::~Paciencia() {
 
 }
 
@@ -244,7 +269,7 @@ CardGroup *Paciencia::create_col(int col) {
     CardGroup *group = add_card_group(Vertical); 
     empty_ghost->link = group;   
     group->set_xy(calc_col_x(col), calc_row_y(2)); 
-    for (int i = 1; i <= col; i++) {
+    for (int i = 1; i < col*2; i+=5) {
         Card *c = group->add_card(new PacienciaCard(this, pop_baralho(), 0, 0));
         c->set_card_face(FACE_DOWN);
         c->set_enabled(false);

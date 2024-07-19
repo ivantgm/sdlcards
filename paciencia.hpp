@@ -14,6 +14,7 @@ public:
 public:
     Cols cols;
     int pop_baralho(void);
+    void new_game(void);
 private:
     const int cw = 100;
     const int ch = 150;

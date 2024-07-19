@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------------
 App::App(const string& window_caption, int width, int heigth) {
     window = NULL;
+    last_render_at = NULL;
     this->width = width;
     this->heigth = heigth;
     animate_stack = 0;    
@@ -71,15 +72,14 @@ void App::loop(void) {
 void App::poll_event(SDL_Event *e) {
     switch(e->type) {
         case SDL_MOUSEMOTION: {            
-            static Render *last_render = NULL;
             Render *r = get_render_at(e->motion.x, e->motion.y);            
-            if((r) && (last_render != r)) {
+            if((r) && (last_render_at != r)) {
                 r->mouse_over();
             }            
-            if((last_render) && (last_render != r)) {
-                last_render->mouse_leave();
+            if((last_render_at) && (last_render_at != r)) {
+                last_render_at->mouse_leave();
             }
-            last_render = r;
+            last_render_at = r;
             break;
         }
         case SDL_MOUSEBUTTONDOWN: {
@@ -119,9 +119,11 @@ void App::render_renders(void) {
 
 //-----------------------------------------------------------------------------
 void App::delete_renders(void) {
+    last_render_at = NULL;
     for(RendersI i = renders.begin(); i != renders.end(); i++) {
         delete (*i);                
-    }     
+    }
+    renders.clear();    
 }
 
 //-----------------------------------------------------------------------------

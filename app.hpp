@@ -56,17 +56,18 @@ protected:
     CardGroup *add_card_group(CardGroupDirection direction);
     CardGroup *add_card_group(void);
     Render *get_render_at(int x, int y);
+    void delete_renders(void);
 private:
     SDL_Window* window; 
     SDL_Renderer* window_renderer;
     int width;
     int heigth;
+    Render *last_render_at;
 private:
     int animate_stack;
     Animates animates;
 private:
-    void render_renders(void);
-    void delete_renders(void);
+    void render_renders(void);    
     void render(void);    
 };
 
