@@ -19,6 +19,7 @@ private:
     const int cw = 100;
     const int ch = 150;
     const int dist = 12;
+    const int ghost_alpha = 32;
     Baralho baralho;   
     CardGroup *casa_ouros;
     Card *casa_ouros_ghost;

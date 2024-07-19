@@ -2,7 +2,7 @@
 #include <algorithm>
 
 //-----------------------------------------------------------------------------
-Paciencia::Paciencia() : App("Paciência 1.0", 800, 600) {    
+Paciencia::Paciencia() : App("Paciência 1.0", 910, 700) {    
     
     new_game();    
 
@@ -24,7 +24,7 @@ void Paciencia::new_game(void) {
             baralho.push_back(v*10+n);
         }
     }
-    srand(2);
+    srand(7);
     random_shuffle(baralho.begin(), baralho.end());    
 
     delete_renders();
@@ -41,7 +41,7 @@ void Paciencia::new_game(void) {
         paciencia->new_game();
     };    
 
-    for (int i = 1; i <= 7; i++) {
+    for (int i = 1; i <= 8; i++) {
         create_col(i);
     }
 
@@ -63,7 +63,7 @@ void Paciencia::new_game(void) {
     casa_ouros = add_card_group();
     casa_ouros->set_xy(calc_col_x(2), calc_row_y(1));    
     casa_ouros_ghost = casa_ouros->add_card(11);
-    casa_ouros_ghost->set_alpha(32);
+    casa_ouros_ghost->set_alpha(ghost_alpha);
     casa_ouros_ghost->set_enabled(false);
     casa_ouros_ghost->on_mouse_click = casa_ouros_click;
 
@@ -77,7 +77,7 @@ void Paciencia::new_game(void) {
     casa_espadas = add_card_group();
     casa_espadas->set_xy(calc_col_x(3), calc_row_y(1));    
     casa_espadas_ghost = casa_espadas->add_card(12);
-    casa_espadas_ghost->set_alpha(32);
+    casa_espadas_ghost->set_alpha(ghost_alpha);
     casa_espadas_ghost->set_enabled(false);
     casa_espadas_ghost->on_mouse_click = casa_espadas_click;    
 
@@ -90,7 +90,7 @@ void Paciencia::new_game(void) {
     casa_copas = add_card_group();
     casa_copas->set_xy(calc_col_x(4), calc_row_y(1));    
     casa_copas_ghost = casa_copas->add_card(13);
-    casa_copas_ghost->set_alpha(32);
+    casa_copas_ghost->set_alpha(ghost_alpha);
     casa_copas_ghost->set_enabled(false);
     casa_copas_ghost->on_mouse_click = casa_copas_click;    
 
@@ -102,7 +102,7 @@ void Paciencia::new_game(void) {
     casa_paus = add_card_group();
     casa_paus->set_xy(calc_col_x(5), calc_row_y(1));    
     casa_paus_ghost = casa_paus->add_card(14);
-    casa_paus_ghost->set_alpha(32);
+    casa_paus_ghost->set_alpha(ghost_alpha);
     casa_paus_ghost->set_enabled(false);
     casa_paus_ghost->on_mouse_click = casa_paus_click;
 
@@ -136,9 +136,11 @@ void Paciencia::pega_monte(Render *r) {
         }
         if(baralho.size()) {
             col->add_card(new PacienciaCard(this, pop_baralho(), 0, 0)); 
-        } else {
-            monte->set_alpha(32);
-        }      
+        } 
+        if(!baralho.size()) {
+            monte->set_alpha(ghost_alpha);
+        }
+        
     }
 }
 
@@ -262,14 +264,14 @@ CardGroup *Paciencia::create_col(int col) {
     };    
     
     Card *empty_ghost = add_card(0, calc_col_x(col), calc_row_y(2));
-    empty_ghost->set_alpha(16);
+    empty_ghost->set_alpha(ghost_alpha);
     empty_ghost->set_enabled(false);
     empty_ghost->on_mouse_click = empty_ghost_click;
 
     CardGroup *group = add_card_group(Vertical); 
     empty_ghost->link = group;   
     group->set_xy(calc_col_x(col), calc_row_y(2)); 
-    for (int i = 1; i < col*2; i+=5) {
+    for (int i = 0; i < col; i+=2) {
         Card *c = group->add_card(new PacienciaCard(this, pop_baralho(), 0, 0));
         c->set_card_face(FACE_DOWN);
         c->set_enabled(false);
