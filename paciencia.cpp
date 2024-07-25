@@ -1,4 +1,5 @@
 #include "paciencia.hpp"
+#include "exception.hpp"
 #include <algorithm>
 
 //-----------------------------------------------------------------------------
@@ -175,6 +176,8 @@ void Paciencia::casa_click(Naipe naipe) {
             casa = casa_paus;
             casa_ghost = casa_paus_ghost;
             break;
+        case NONE:
+            throw Exception("Não tem um naipe.", "Paciencia::casa_click");
     };    
     
     for(auto col : cols) {
