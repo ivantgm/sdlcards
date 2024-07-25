@@ -24,20 +24,22 @@ void Paciencia::new_game(void) {
             baralho.push_back(v*10+n);
         }
     }
-    srand(7);
+    srand(26); // 4,7
     random_shuffle(baralho.begin(), baralho.end());    
 
     delete_renders();
 
     Texture *button = add_texture_text( 
             "./28 Days Later.ttf", 
-            "retry",
+            "menu",
             600, 10, 
             {200, 200, 200},
             52
     );
     button->on_mouse_click = [](Render *r) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
+        
+       
         paciencia->new_game();
     };    
 
@@ -271,12 +273,17 @@ CardGroup *Paciencia::create_col(int col) {
     CardGroup *group = add_card_group(Vertical); 
     empty_ghost->link = group;   
     group->set_xy(calc_col_x(col), calc_row_y(2)); 
-    for (int i = 0; i < col; i+=2) {
+
+    const int cols_values[8] = {3, 3, 3, 3, 4, 4, 4, 4};
+    for (int i = 0; i < cols_values[col-1]; i++) {
         Card *c = group->add_card(new PacienciaCard(this, pop_baralho(), 0, 0));
         c->set_card_face(FACE_DOWN);
         c->set_enabled(false);
     }    
-    group->add_card(new PacienciaCard(this, pop_baralho(), 0, 0)); 
+    const int cartas_abertas = 1;
+    for (int i = 0; i < cartas_abertas; i++) {
+        group->add_card(new PacienciaCard(this, pop_baralho(), 0, 0)); 
+    }    
     cols.push_back(group);
     return group;   
 }
