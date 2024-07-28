@@ -15,6 +15,69 @@ Paciencia::~Paciencia() {
 }
 
 //-----------------------------------------------------------------------------
+void Paciencia::menu(void) {
+    const int LINHAS = 30;
+    const int COLUNAS = 50;
+    Grid *form = add_grid( 
+         COLUNAS, LINHAS, (get_width()-8) / COLUNAS, (get_heigth()-8) / LINHAS, 
+         0, 0, 0, 0, {255, 0, 0}
+    );
+    form->move(4, 4);
+    for(int c = 0; c < COLUNAS; c++) {
+        for(int r = 0; r < LINHAS; r++) {
+            form->add_retangle(c, r, {16,16,16}, true);
+        }
+    }
+    Render *btn_quit = form->add_render(1, 0, create_paciencia_button("SAIR", 640, 10, 96));
+    btn_quit->on_mouse_click = [](Render *r) {
+        Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
+        paciencia->push_quit();
+    };  
+
+    Render *btn_cancel = form->add_render(18, 0, create_paciencia_button("VOLTA PRO JOGO", 640, 10, 96));    
+    btn_cancel->on_mouse_click = [](Render *r) {
+        Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
+        paciencia->release_last_render_at(r);
+        paciencia->delete_render(r->owner);
+        paciencia->push_mouse_motion();
+    };  
+
+    push_mouse_motion();
+
+
+}
+
+//-----------------------------------------------------------------------------
+void Paciencia::delete_render(const Render *render) {
+    App::delete_render(render);
+}
+
+//-----------------------------------------------------------------------------
+Texture *Paciencia::add_paciencia_button(const string& text, int x, int y, int font_size) {
+    
+    Texture *p = create_paciencia_button(text, x, y, font_size);
+    renders.push_back(p);
+    return p;    
+}
+
+//-----------------------------------------------------------------------------
+Texture *Paciencia::create_paciencia_button(const string& text, int x, int y, int font_size) {
+    
+    Texture *button = new Texture(this, "./VT323-Regular.ttf", text, x, y, {127, 127, 127}, font_size);
+
+    button->on_mouse_over = [](Render *r) {
+        Texture *button = dynamic_cast<Texture*>(r);
+        button->set_color(255, 0, 0);
+    };
+    button->on_mouse_leave = [](Render *r) {
+        Texture *button = dynamic_cast<Texture*>(r);
+        button->set_color(127, 127, 127);
+    };    
+    button->set_color(127, 127, 127);
+    return button;
+}
+
+//-----------------------------------------------------------------------------
 void Paciencia::new_game(void) {
     
     cols.clear();
@@ -25,24 +88,17 @@ void Paciencia::new_game(void) {
             baralho.push_back(v*10+n);
         }
     }
-    srand(26); // 4,7
+    srand(255); // 4,7
     random_shuffle(baralho.begin(), baralho.end());    
 
     delete_renders();
 
-    Texture *button = add_texture_text( 
-            "./28 Days Later.ttf", 
-            "menu",
-            600, 10, 
-            {200, 200, 200},
-            52
-    );
+    Texture *button = add_paciencia_button("MENU", 640, 10, 120);
     button->on_mouse_click = [](Render *r) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
-        
-       
-        paciencia->new_game();
+        paciencia->menu();
     };    
+
 
     for (int i = 1; i <= 8; i++) {
         create_col(i);
@@ -115,9 +171,6 @@ void Paciencia::new_game(void) {
 void Paciencia::poll_event(SDL_Event *e) {    
     switch(e->type) {
         case SDL_KEYDOWN: {
-            if(e->key.keysym.sym == SDLK_ESCAPE) {
-               e->type = SDL_QUIT; 
-            }
             if(e->key.keysym.sym == SDLK_p) {
                screen_shot(); 
             }

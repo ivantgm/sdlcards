@@ -15,6 +15,8 @@ public:
     Cols cols;
     int pop_baralho(void);
     void new_game(void);
+    void menu(void);
+    void delete_render(const Render *render);
 private:
     const int cw = 100;
     const int ch = 150;
@@ -37,7 +39,11 @@ private:
     void casa_click(Naipe naipe);
     int calc_col_x(int col) const;
     int calc_row_y(int row) const;
-    CardGroup *create_col(int col);    
+    CardGroup *create_col(int col); 
+    Texture *add_paciencia_button(const string& text,
+        int x, int y, int font_size);
+    Texture *create_paciencia_button(const string& text,
+        int x, int y, int font_size);
 };
 
 class PacienciaCard: public Card {

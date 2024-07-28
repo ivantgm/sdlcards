@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "exception.hpp"
 #include <iostream>
+#include <algorithm>
 
 
 //-----------------------------------------------------------------------------
@@ -119,11 +120,30 @@ void App::render_renders(void) {
 
 //-----------------------------------------------------------------------------
 void App::delete_renders(void) {
-    last_render_at = NULL;
+    
+    release_last_render_at(NULL);
     for(RendersI i = renders.begin(); i != renders.end(); i++) {
         delete (*i);                
     }
     renders.clear();    
+}
+
+//-----------------------------------------------------------------------------
+void App::delete_render(const Render *render) {
+    
+    release_last_render_at(render);
+    RendersI position = find(renders.begin(), renders.end(), render);
+    if(position != renders.end())  {
+        renders.erase(position);
+    }
+    delete render;  
+}
+
+//-----------------------------------------------------------------------------
+void App::release_last_render_at(const Render *render) {
+    if((!render) || (last_render_at == render)) {
+        last_render_at = NULL;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -233,6 +253,15 @@ void App::screen_shot(void) {
 }
 
 //-----------------------------------------------------------------------------
+int App::get_width(void) {
+    return width;
+}
+//-----------------------------------------------------------------------------    
+int App::get_heigth(void) {
+    return heigth;
+}
+
+//-----------------------------------------------------------------------------
 Render *App::get_render_at(int x, int y) {
     for (RendersCRI r = renders.rbegin(); r != renders.rend(); r++) {
         const Renders &rs = (*r)->get_renders();
@@ -287,4 +316,19 @@ void App::add_animate(Card *card, int x, int y) {
     animate.dest_x = x;
     animate.dest_y = y;
     animates.push_back(animate);
+}
+
+//-----------------------------------------------------------------------------
+void App::push_mouse_motion(void) {
+    SDL_Event e;
+    e.type = SDL_MOUSEMOTION;
+    SDL_GetMouseState(&e.motion.x, &e.motion.y);    
+    SDL_PushEvent(&e);
+}
+
+//-----------------------------------------------------------------------------
+void App::push_quit(void) {
+    SDL_Event e;
+    e.type = SDL_QUIT;
+    SDL_PushEvent(&e);
 }
