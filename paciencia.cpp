@@ -1,9 +1,21 @@
 #include "paciencia.hpp"
 #include "exception.hpp"
 #include <algorithm>
+#include <fstream>
 
 //-----------------------------------------------------------------------------
-Paciencia::Paciencia() : App("Paciência 1.0", 910, 700) {    
+Paciencia::Paciencia() : App("Paciência 1.0", 910, 700) {
+
+    save_path = SDL_GetPrefPath("miliogo", "paciencia");
+    config_file = save_path + "config.dat";
+
+    ifstream f(config_file.c_str());
+    if(f.good()) {
+        f.read((char*)&save_data, sizeof(SaveData));
+    } else {
+        save_data.seed = 42;
+        save_data.dificult = 0;
+    }    
     
     new_game();    
 
@@ -11,7 +23,10 @@ Paciencia::Paciencia() : App("Paciência 1.0", 910, 700) {
 
 //-----------------------------------------------------------------------------
 Paciencia::~Paciencia() {
-
+    ofstream f(config_file.c_str());
+    if(f.good()) {
+        f.write((char*)&save_data, sizeof(SaveData));
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -40,7 +55,48 @@ void Paciencia::menu(void) {
         paciencia->release_last_render_at(r);
         paciencia->delete_render(r->owner);
         paciencia->push_mouse_motion();
-    };  
+    }; 
+
+    form->add_render(5, 8, new Texture(this, "./VT323-Regular.ttf", "Random Seed:", 0, 0, {127, 127, 127}, 48));
+
+    spins_rand_seed.clear();
+    spins_rand_seed.push_back((Spin*) form->add_render(5, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(7, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(9, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+
+    spins_rand_seed.push_back((Spin*) form->add_render(12, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(14, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(16, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+
+    spins_rand_seed.push_back((Spin*) form->add_render(19, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(21, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(23, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    
+    
+    string s = to_string(save_data.seed);
+    while(s.length()<9) s = "0" + s;
+    int l = 0;
+    for(auto i : spins_rand_seed) {
+        char c = s[l++]-'0';
+        i->set_value(c);
+    }    
+
+    Render *btn_apply_seed = form->add_render(12, 25, create_paciencia_button("Aplicar e Reiniciar", 0, 0, 72));    
+    btn_apply_seed->on_mouse_click = [](Render *r) {
+        Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);        
+        paciencia->release_last_render_at(r);
+        int seed = 0;
+        int ex = 8;
+        for(auto i : paciencia->spins_rand_seed) {
+            int value = i->get_value();
+            seed += value * pow(10, ex);
+            ex--;
+        }
+        paciencia->delete_render(r->owner);
+        paciencia->push_mouse_motion();
+        paciencia->save_data.seed = seed;
+        paciencia->new_game();
+    };     
 
     push_mouse_motion();
 
@@ -87,8 +143,8 @@ void Paciencia::new_game(void) {
         for(int n = 1; n <= 4; n++) {
             baralho.push_back(v*10+n);
         }
-    }
-    srand(255); // 4,7
+    }    
+    srand(save_data.seed);
     random_shuffle(baralho.begin(), baralho.end());    
 
     delete_renders();

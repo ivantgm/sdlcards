@@ -202,4 +202,33 @@ private:
     int hpad;        
 };
 
+class Spin : public Render {
+public:
+    Spin(App *app, const string &ttf_file_name, 
+        int x, int y, const SDL_Color &color, 
+        const SDL_Color &bg_color,
+        int font_size
+    );
+    ~Spin();
+public:    
+    SDL_Rect rect;
+    SDL_Rect text_rect;
+    bool animate;
+    void render(void);
+    void set_x(int x);
+    void set_y(int y);
+    void move(int x, int y);
+    void get_rect(SDL_Rect &rect) const;
+    int get_value(void);
+    void set_value(int value);
+private:
+    vector<SDL_Texture*> textures;
+    vector<SDL_Point> points_up;
+    vector<SDL_Point> points_down;
+    SDL_Color bg_color;
+    int spin;
+    void inc_spin(void);
+    void dec_spin(void);
+};
+
 #endif

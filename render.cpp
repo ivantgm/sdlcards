@@ -772,3 +772,216 @@ Render *Grid::add_render(int col, int row, Render *render) {
     return render;
 }
 
+
+//-----------------------------------------------------------------------------
+//- Spin ----------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+Spin::Spin(App *app, const string &ttf_file_name, int x, int y, 
+    const SDL_Color &color, const SDL_Color &bg_color, int font_size) 
+: Render(app) {
+    animate = false;
+    this->color = color;
+    this->bg_color = bg_color;
+    spin = 0;
+    TTF_Font* font = TTF_OpenFont(ttf_file_name.c_str(), font_size);
+    if(!font) {
+        throw Exception("Não foi possível carregar a fonte " + ttf_file_name, TTF_GetError());    
+    }
+
+    
+    for(int i = 0; i < 10; i++) {
+        string text = to_string(i);
+        SDL_Surface* temp_surface = TTF_RenderText_Solid(font, text.c_str(), color);
+        if(!temp_surface) {
+            throw Exception("Não foi possível renderizar o texto " + text, TTF_GetError());
+        }
+        if(!i) {
+            SDL_GetClipRect(temp_surface, &text_rect);
+        }        
+        SDL_Texture *texture;
+        texture = SDL_CreateTextureFromSurface(app->get_window_renderer(), temp_surface);
+        if(!texture) {
+            throw Exception("Não foi possível criar a textura do texto " + text, SDL_GetError());
+        }
+        textures.push_back(texture);
+        SDL_FreeSurface(temp_surface);
+
+    }
+    TTF_CloseFont(font);
+
+    const int HH = 12;
+    points_up = {
+        {0, HH}, 
+        {text_rect.w/2, 0}, 
+        {text_rect.w, HH}, 
+        {0, HH}
+    };
+    points_down = {
+        {0, text_rect.h+HH}, 
+        {text_rect.w/2, text_rect.h+(HH*2)}, 
+        {text_rect.w, text_rect.h+HH}, 
+        {0, text_rect.h+HH}
+    }; 
+    rect = text_rect;
+    rect.x = x;
+    rect.y = y;
+    rect.h += (HH*2);
+    text_rect.x = x;
+    text_rect.y += HH;
+
+    on_mouse_click = [](Render *r) {
+        auto up_function = [](void *obj) {
+            Spin *spin = (Spin*)obj;
+            spin->animate = true;
+            for(int i = 0; i < 100; i++) {
+                spin->dec_spin();
+                SDL_Delay(3);
+            }
+            spin->animate = false;
+            return 0;
+        };
+        auto down_function = [](void *obj) {
+            Spin *spin = (Spin*)obj;
+            spin->animate = true;
+            for(int i = 0; i < 100; i++) {
+                spin->inc_spin();
+                SDL_Delay(3);
+            }
+            spin->animate = false;
+            return 0;
+        };
+        Spin *spin = dynamic_cast<Spin*>(r);
+        if(!spin->animate) {            
+            int x, y;
+            SDL_Rect rect;
+            spin->get_rect(rect);
+            SDL_GetMouseState(&x, &y);
+            if(y > (rect.y+rect.h-HH)) {
+                SDL_CreateThread(up_function, NULL, (void*)r);
+            } else if (y < (rect.y+HH)) {
+                SDL_CreateThread(down_function, NULL, (void*)r);
+            }
+
+        }
+    };
+
+
+}
+
+//-----------------------------------------------------------------------------
+Spin::~Spin() {
+    for (auto i : textures) {
+        SDL_DestroyTexture(i);
+    }    
+}
+
+//-----------------------------------------------------------------------------
+void Spin::render(void) {
+
+    SDL_SetRenderDrawColor(app->get_window_renderer(), bg_color.r, bg_color.g, bg_color.b, bg_color.a);
+    SDL_RenderFillRect(app->get_window_renderer(), &rect); 
+
+    if((spin<0)||(spin>999)) {
+        throw Exception("Valor de spin alem dos limites", "Spin::render()");    
+    }
+    int index = get_value();
+    SDL_Texture *texture0 = *(textures.begin()+index);
+    SDL_Texture *texture1 = (index!=9) ? *(textures.begin()+index+1) : *textures.begin();
+
+    const float h = text_rect.h;
+    const int s = h/100 * (spin%100);
+
+    SDL_Rect sr0 = text_rect;
+    SDL_Rect dr0 = text_rect;
+    sr0.x = 0;
+    sr0.y = s; 
+    sr0.h -= s;       
+    dr0.h -= s;
+    SDL_RenderCopyEx(app->get_window_renderer(), texture0, &sr0, &dr0, 0, NULL, SDL_FLIP_NONE);
+
+    SDL_Rect sr1 = text_rect;
+    SDL_Rect dr1 = text_rect;
+    sr1.x = 0;
+    sr1.y = 0; 
+    sr1.h = s;
+    dr1.h = s;
+    dr1.y += h-s;
+    SDL_RenderCopyEx(app->get_window_renderer(), texture1, &sr1, &dr1, 0, NULL, SDL_FLIP_NONE);
+
+    SDL_SetRenderDrawColor(app->get_window_renderer(), color.r, color.g, color.b, color.a);
+    SDL_RenderDrawLines(app->get_window_renderer(), points_up.data(), points_up.size()); 
+    SDL_RenderDrawLines(app->get_window_renderer(), points_down.data(), points_down.size()); 
+}
+
+//-----------------------------------------------------------------------------
+void Spin::set_x(int x) {
+    int desloc = x - rect.x;
+    rect.x = x;
+    text_rect.x += desloc;
+    for (auto& point : points_up) {
+        point.x += desloc;
+    }
+    for (auto& point : points_down) {
+        point.x += desloc;
+    }
+
+}
+
+//-----------------------------------------------------------------------------
+void Spin::set_y(int y) {
+    int desloc = y - rect.y;
+    rect.y = y;
+    text_rect.y += desloc;
+    for (auto& point : points_up) {
+        point.y += desloc;
+    }
+    for (auto& point : points_down) {
+        point.y += desloc;
+    }
+}
+
+//-----------------------------------------------------------------------------
+void Spin::move(int x, int y) {
+    rect.x += x;
+    rect.y += y;
+    text_rect.x += x;
+    text_rect.y += y;
+}
+
+//-----------------------------------------------------------------------------
+void Spin::get_rect(SDL_Rect &rect) const {
+    rect.x = this->rect.x;
+    rect.y = this->rect.y;
+    rect.w = this->rect.w;
+    rect.h = this->rect.h;
+}
+
+//-----------------------------------------------------------------------------
+void Spin::inc_spin(void) {
+    if(spin == 999) {
+        spin = 0;
+    } else {
+        spin++;
+    }
+}
+
+//-----------------------------------------------------------------------------
+void Spin::dec_spin(void) {
+    if(spin == 0) {
+        spin=999;
+    } else {
+        spin--;
+    }
+}
+
+//-----------------------------------------------------------------------------
+int Spin::get_value(void) {
+    return spin/100;
+}
+
+//-----------------------------------------------------------------------------
+void Spin::set_value(int value) {
+    spin = value*100;
+}
+
+
