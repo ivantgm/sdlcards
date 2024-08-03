@@ -29,6 +29,11 @@ public:
     void loop(void);
     virtual void poll_event(SDL_Event *e);
     void screen_shot(void);
+    int get_width(void);
+    int get_heigth(void);
+    void release_last_render_at(const Render *render);
+    void push_mouse_motion(void);
+    void push_quit(void);
 public:    
     void begin_animate(void);
     void end_animate(void);
@@ -54,18 +59,21 @@ protected:
         );
     Card *add_card(int card_id, int x, int y);
     CardGroup *add_card_group(CardGroupDirection direction);
+    CardGroup *add_card_group(void);
     Render *get_render_at(int x, int y);
+    void delete_renders(void);
+    void delete_render(const Render *render);    
 private:
     SDL_Window* window; 
     SDL_Renderer* window_renderer;
     int width;
     int heigth;
+    Render *last_render_at;
 private:
     int animate_stack;
     Animates animates;
 private:
-    void render_renders(void);
-    void delete_renders(void);
+    void render_renders(void);    
     void render(void);    
 };
 

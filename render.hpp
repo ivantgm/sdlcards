@@ -29,6 +29,7 @@ public:
 public:
     App *app;
     Render *owner;
+    Render *link;
     SDL_Color color;
     virtual void render(void) = 0;
     virtual void set_x(int x) = 0;
@@ -199,6 +200,36 @@ private:
     int hline_size;
     int vpad;
     int hpad;        
+};
+
+class Spin : public Render {
+public:
+    Spin(App *app, const string &ttf_file_name, 
+        int x, int y, const SDL_Color &color, 
+        const SDL_Color &bg_color,
+        int font_size,
+        const vector<string> &items = {"0","1","2","3","4","5","6","7","8","9"}
+    );
+    ~Spin();
+public:    
+    SDL_Rect rect;
+    SDL_Rect text_rect;
+    bool animate;
+    void render(void);
+    void set_x(int x);
+    void set_y(int y);
+    void move(int x, int y);
+    void get_rect(SDL_Rect &rect) const;
+    int get_value(void);
+    void set_value(int value);
+private:
+    vector<SDL_Texture*> textures;
+    vector<SDL_Point> points_up;
+    vector<SDL_Point> points_down;
+    SDL_Color bg_color;
+    int spin;
+    void inc_spin(void);
+    void dec_spin(void);
 };
 
 #endif

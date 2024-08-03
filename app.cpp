@@ -1,11 +1,13 @@
 #include "app.hpp"
 #include "exception.hpp"
 #include <iostream>
+#include <algorithm>
 
 
 //-----------------------------------------------------------------------------
 App::App(const string& window_caption, int width, int heigth) {
     window = NULL;
+    last_render_at = NULL;
     this->width = width;
     this->heigth = heigth;
     animate_stack = 0;    
@@ -71,15 +73,14 @@ void App::loop(void) {
 void App::poll_event(SDL_Event *e) {
     switch(e->type) {
         case SDL_MOUSEMOTION: {            
-            static Render *last_render = NULL;
             Render *r = get_render_at(e->motion.x, e->motion.y);            
-            if((r) && (last_render != r)) {
+            if((r) && (last_render_at != r)) {
                 r->mouse_over();
             }            
-            if((last_render) && (last_render != r)) {
-                last_render->mouse_leave();
+            if((last_render_at) && (last_render_at != r)) {
+                last_render_at->mouse_leave();
             }
-            last_render = r;
+            last_render_at = r;
             break;
         }
         case SDL_MOUSEBUTTONDOWN: {
@@ -119,9 +120,30 @@ void App::render_renders(void) {
 
 //-----------------------------------------------------------------------------
 void App::delete_renders(void) {
+    
+    release_last_render_at(NULL);
     for(RendersI i = renders.begin(); i != renders.end(); i++) {
         delete (*i);                
-    }     
+    }
+    renders.clear();    
+}
+
+//-----------------------------------------------------------------------------
+void App::delete_render(const Render *render) {
+    
+    release_last_render_at(render);
+    RendersI position = find(renders.begin(), renders.end(), render);
+    if(position != renders.end())  {
+        renders.erase(position);
+    }
+    delete render;  
+}
+
+//-----------------------------------------------------------------------------
+void App::release_last_render_at(const Render *render) {
+    if((!render) || (last_render_at == render)) {
+        last_render_at = NULL;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -208,8 +230,15 @@ Card *App::add_card(int card_id, int x, int y) {
     return p;    
 }
 
+//-----------------------------------------------------------------------------
 CardGroup *App::add_card_group(CardGroupDirection direction) {
     CardGroup *p = new CardGroup(this, direction);
+    renders.push_back(p);
+    return p;    
+}
+//-----------------------------------------------------------------------------
+CardGroup *App::add_card_group(void) {
+    CardGroup *p = new CardGroup(this);
     renders.push_back(p);
     return p;    
 }
@@ -221,6 +250,15 @@ void App::screen_shot(void) {
     SDL_RenderReadPixels(window_renderer, NULL, SDL_PIXELFORMAT_ARGB8888, ss->pixels, ss->pitch);
     SDL_SaveBMP(ss, "screenshots/screenshot.bmp");
     SDL_FreeSurface(ss);
+}
+
+//-----------------------------------------------------------------------------
+int App::get_width(void) {
+    return width;
+}
+//-----------------------------------------------------------------------------    
+int App::get_heigth(void) {
+    return heigth;
 }
 
 //-----------------------------------------------------------------------------
@@ -278,4 +316,19 @@ void App::add_animate(Card *card, int x, int y) {
     animate.dest_x = x;
     animate.dest_y = y;
     animates.push_back(animate);
+}
+
+//-----------------------------------------------------------------------------
+void App::push_mouse_motion(void) {
+    SDL_Event e;
+    e.type = SDL_MOUSEMOTION;
+    SDL_GetMouseState(&e.motion.x, &e.motion.y);    
+    SDL_PushEvent(&e);
+}
+
+//-----------------------------------------------------------------------------
+void App::push_quit(void) {
+    SDL_Event e;
+    e.type = SDL_QUIT;
+    SDL_PushEvent(&e);
 }
