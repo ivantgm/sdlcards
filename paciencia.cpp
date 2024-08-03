@@ -49,7 +49,7 @@ void Paciencia::menu(void) {
         paciencia->push_quit();
     };  
 
-    Render *btn_cancel = form->add_render(18, 0, create_paciencia_button("VOLTA PRO JOGO", 640, 10, 96));    
+    Render *btn_cancel = form->add_render(16, 0, create_paciencia_button("VOLTAR PRO JOGO", 640, 10, 96));    
     btn_cancel->on_mouse_click = [](Render *r) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
         paciencia->release_last_render_at(r);
@@ -57,20 +57,20 @@ void Paciencia::menu(void) {
         paciencia->push_mouse_motion();
     }; 
 
-    form->add_render(5, 8, new Texture(this, "./VT323-Regular.ttf", "Random Seed:", 0, 0, {127, 127, 127}, 48));
+    form->add_render(5, 8, new Texture(this, FONTFILE, "Random Seed:", 0, 0, {127, 127, 127}, 48));
 
     spins_rand_seed.clear();
-    spins_rand_seed.push_back((Spin*) form->add_render(5, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
-    spins_rand_seed.push_back((Spin*) form->add_render(7, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
-    spins_rand_seed.push_back((Spin*) form->add_render(9, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(5, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(7, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(9, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
 
-    spins_rand_seed.push_back((Spin*) form->add_render(12, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
-    spins_rand_seed.push_back((Spin*) form->add_render(14, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
-    spins_rand_seed.push_back((Spin*) form->add_render(16, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(12, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(14, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(16, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
 
-    spins_rand_seed.push_back((Spin*) form->add_render(19, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
-    spins_rand_seed.push_back((Spin*) form->add_render(21, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
-    spins_rand_seed.push_back((Spin*) form->add_render(23, 10, new Spin(this, "./VT323-Regular.ttf", 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(19, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(21, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
+    spins_rand_seed.push_back((Spin*) form->add_render(23, 10, new Spin(this, FONTFILE, 0, 0, {255,255,255}, {64,64,64}, 72)));
     
     
     string s = to_string(save_data.seed);
@@ -79,7 +79,15 @@ void Paciencia::menu(void) {
     for(auto i : spins_rand_seed) {
         char c = s[l++]-'0';
         i->set_value(c);
-    }    
+    }   
+
+    form->add_render(5, 17, new Texture(this, FONTFILE, "Dificuldade:", 0, 0, {127, 127, 127}, 48));
+    spin_dificult = (Spin*)form->add_render(5, 19, 
+        new Spin(this, FONTFILE, 0, 0, 
+            {255,255,255}, {64,64,64}, 72, {"FACIL","MEDIO","DIFICIL"}
+        )
+    ); 
+    spin_dificult->set_value(save_data.dificult);
 
     Render *btn_apply_seed = form->add_render(12, 25, create_paciencia_button("Aplicar e Reiniciar", 0, 0, 72));    
     btn_apply_seed->on_mouse_click = [](Render *r) {
@@ -92,8 +100,9 @@ void Paciencia::menu(void) {
             seed += value * pow(10, ex);
             ex--;
         }
+        paciencia->save_data.dificult = paciencia->spin_dificult->get_value();
         paciencia->delete_render(r->owner);
-        paciencia->push_mouse_motion();
+        paciencia->push_mouse_motion();        
         paciencia->save_data.seed = seed;
         paciencia->new_game();
     };     
@@ -119,7 +128,7 @@ Texture *Paciencia::add_paciencia_button(const string& text, int x, int y, int f
 //-----------------------------------------------------------------------------
 Texture *Paciencia::create_paciencia_button(const string& text, int x, int y, int font_size) {
     
-    Texture *button = new Texture(this, "./VT323-Regular.ttf", text, x, y, {127, 127, 127}, font_size);
+    Texture *button = new Texture(this, FONTFILE, text, x, y, {127, 127, 127}, font_size);
 
     button->on_mouse_over = [](Render *r) {
         Texture *button = dynamic_cast<Texture*>(r);
@@ -154,9 +163,9 @@ void Paciencia::new_game(void) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
         paciencia->menu();
     };    
-
-
-    for (int i = 1; i <= 8; i++) {
+    const int DIFICIL = 2;
+    const int NUMERO_COLUNAS = (save_data.dificult==DIFICIL) ? 7 : 8;
+    for (int i = 1; i <= NUMERO_COLUNAS; i++) {
         create_col(i);
     }
 
@@ -386,7 +395,19 @@ CardGroup *Paciencia::create_col(int col) {
     empty_ghost->link = group;   
     group->set_xy(calc_col_x(col), calc_row_y(2)); 
 
-    const int cols_values[8] = {3, 3, 3, 3, 4, 4, 4, 4};
+    const int FACIL = 0;
+    const int DIFICIL = 2;
+    vector<int> cols_values;
+    if (save_data.dificult == DIFICIL) {
+        cols_values = {3, 3, 3, 3, 4, 4, 4};
+    } else {
+        if (save_data.dificult == FACIL) {
+            cols_values = {2, 2, 2, 2, 3, 3, 3, 3};
+        } else {
+            cols_values = {3, 3, 3, 3, 4, 4, 4, 4};
+        }
+    }
+    
     for (int i = 0; i < cols_values[col-1]; i++) {
         Card *c = group->add_card(new PacienciaCard(this, pop_baralho(), 0, 0));
         c->set_card_face(FACE_DOWN);

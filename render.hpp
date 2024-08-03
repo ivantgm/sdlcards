@@ -207,7 +207,8 @@ public:
     Spin(App *app, const string &ttf_file_name, 
         int x, int y, const SDL_Color &color, 
         const SDL_Color &bg_color,
-        int font_size
+        int font_size,
+        const vector<string> &items = {"0","1","2","3","4","5","6","7","8","9"}
     );
     ~Spin();
 public:    

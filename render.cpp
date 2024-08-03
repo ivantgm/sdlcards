@@ -777,7 +777,8 @@ Render *Grid::add_render(int col, int row, Render *render) {
 //- Spin ----------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 Spin::Spin(App *app, const string &ttf_file_name, int x, int y, 
-    const SDL_Color &color, const SDL_Color &bg_color, int font_size) 
+    const SDL_Color &color, const SDL_Color &bg_color, int font_size,
+    const vector<string> &items) 
 : Render(app) {
     animate = false;
     this->color = color;
@@ -788,16 +789,15 @@ Spin::Spin(App *app, const string &ttf_file_name, int x, int y,
         throw Exception("Não foi possível carregar a fonte " + ttf_file_name, TTF_GetError());    
     }
 
-    
-    for(int i = 0; i < 10; i++) {
-        string text = to_string(i);
+    int max_w = 0;
+    for(auto &text : items) {        
         SDL_Surface* temp_surface = TTF_RenderText_Solid(font, text.c_str(), color);
         if(!temp_surface) {
             throw Exception("Não foi possível renderizar o texto " + text, TTF_GetError());
         }
-        if(!i) {
-            SDL_GetClipRect(temp_surface, &text_rect);
-        }        
+        SDL_GetClipRect(temp_surface, &text_rect);
+        max_w = max(text_rect.w, max_w);
+
         SDL_Texture *texture;
         texture = SDL_CreateTextureFromSurface(app->get_window_renderer(), temp_surface);
         if(!texture) {
@@ -808,6 +808,8 @@ Spin::Spin(App *app, const string &ttf_file_name, int x, int y,
 
     }
     TTF_CloseFont(font);
+
+    text_rect.w = max_w;
 
     const int HH = 12;
     points_up = {
@@ -881,12 +883,12 @@ void Spin::render(void) {
     SDL_SetRenderDrawColor(app->get_window_renderer(), bg_color.r, bg_color.g, bg_color.b, bg_color.a);
     SDL_RenderFillRect(app->get_window_renderer(), &rect); 
 
-    if((spin<0)||(spin>999)) {
+    if((spin<0)||(spin>(textures.size()*100-1))) {
         throw Exception("Valor de spin alem dos limites", "Spin::render()");    
     }
     int index = get_value();
     SDL_Texture *texture0 = *(textures.begin()+index);
-    SDL_Texture *texture1 = (index!=9) ? *(textures.begin()+index+1) : *textures.begin();
+    SDL_Texture *texture1 = (index!=(textures.size()-1)) ? *(textures.begin()+index+1) : *textures.begin();
 
     const float h = text_rect.h;
     const int s = h/100 * (spin%100);
@@ -958,7 +960,7 @@ void Spin::get_rect(SDL_Rect &rect) const {
 
 //-----------------------------------------------------------------------------
 void Spin::inc_spin(void) {
-    if(spin == 999) {
+    if(spin == (textures.size()*100-1)) {
         spin = 0;
     } else {
         spin++;
@@ -968,7 +970,7 @@ void Spin::inc_spin(void) {
 //-----------------------------------------------------------------------------
 void Spin::dec_spin(void) {
     if(spin == 0) {
-        spin=999;
+        spin=(textures.size()*100-1);
     } else {
         spin--;
     }

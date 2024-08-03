@@ -16,10 +16,12 @@ public:
     Paciencia();
     ~Paciencia();
     void poll_event(SDL_Event *e);
-public:
+public:    
     Cols cols;
     vector<Spin*> spins_rand_seed;
+    Spin *spin_dificult;
     SaveData save_data;
+    const string FONTFILE = "./VT323-Regular.ttf";
     int pop_baralho(void);
     void new_game(void);
     void menu(void);
