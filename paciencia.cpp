@@ -301,6 +301,7 @@ void Paciencia::casa_click(Naipe naipe) {
     for(auto col : cols) {
         Cards selecteds = col->get_selecteds();
         bool mover = false;
+        // todo - nao precisava ser for, pois testa somente a ultima carta, analisar
         for(Cards::reverse_iterator i = selecteds.rbegin(); i != selecteds.rend(); i++) {
             Card *card = (*i);
             int id = card->get_card_id();
