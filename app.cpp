@@ -88,8 +88,10 @@ void App::loop(void) {
         }
         ImGui_ImplSDLRenderer2_NewFrame();
         ImGui_ImplSDL2_NewFrame();
-        ImGui::NewFrame();        
-        ImGui::ShowDemoWindow(&show_demo_window);
+        ImGui::NewFrame(); 
+        if (show_demo_window) {
+            ImGui::ShowDemoWindow(&show_demo_window);
+        }               
         ImGui::Render();
         render();        
     }    
