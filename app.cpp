@@ -3,6 +3,9 @@
 #include <iostream>
 #include <algorithm>
 
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
 
 //-----------------------------------------------------------------------------
 App::App(const string& window_caption, int width, int heigth) {
@@ -37,11 +40,27 @@ App::App(const string& window_caption, int width, int heigth) {
         throw Exception("Não foi possível criar o renderizador da janela", SDL_GetError());
     }  
     SDL_RenderSetLogicalSize(window_renderer, width, heigth);  
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    ImGui::StyleColorsDark();
+    ImGui_ImplSDL2_InitForSDLRenderer(window, window_renderer);
+    ImGui_ImplSDLRenderer2_Init(window_renderer);
+
 }
 
 //-----------------------------------------------------------------------------
 App::~App() {
+
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+
     delete_renders();
+    SDL_DestroyRenderer(window_renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
     TTF_Quit();
@@ -57,14 +76,21 @@ SDL_Renderer* App::get_window_renderer(void) {
 void App::loop(void) {
     SDL_Event e; 
     bool quit = false; 
+    bool show_demo_window = true;
     while(!quit) { 
         while(SDL_PollEvent(&e)) {
+            ImGui_ImplSDL2_ProcessEvent(&e);
             poll_event(&e);
             switch(e.type) {
                 case SDL_QUIT:
                     quit = true;
             }  
         }
+        ImGui_ImplSDLRenderer2_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();        
+        ImGui::ShowDemoWindow(&show_demo_window);
+        ImGui::Render();
         render();        
     }    
 }
@@ -102,11 +128,13 @@ void App::poll_event(SDL_Event *e) {
 }
 
 //-----------------------------------------------------------------------------
-void App::render(void) {
+void App::render(void) {    
+
     SDL_SetRenderDrawColor(window_renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderClear(window_renderer);
 
     render_renders();
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), window_renderer);
 
     SDL_RenderPresent(window_renderer);
 }
