@@ -13,7 +13,8 @@ App::App(const string& window_caption, int width, int heigth) {
     last_render_at = NULL;
     this->width = width;
     this->heigth = heigth;
-    animate_stack = 0;    
+    animate_stack = 0;
+    show_login_window = true;
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
         throw Exception("SDL não inicializou", SDL_GetError());            
     } 
@@ -46,6 +47,7 @@ App::App(const string& window_caption, int width, int heigth) {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.IniFilename = NULL; // onde grava o arquivo imgui.ini
     ImGui::StyleColorsDark();
     ImGui_ImplSDL2_InitForSDLRenderer(window, window_renderer);
     ImGui_ImplSDLRenderer2_Init(window_renderer);
@@ -75,8 +77,7 @@ SDL_Renderer* App::get_window_renderer(void) {
 //-----------------------------------------------------------------------------
 void App::loop(void) {
     SDL_Event e; 
-    bool quit = false; 
-    bool show_demo_window = true;
+    bool quit = false;    
     while(!quit) { 
         while(SDL_PollEvent(&e)) {
             ImGui_ImplSDL2_ProcessEvent(&e);
@@ -89,11 +90,11 @@ void App::loop(void) {
         ImGui_ImplSDLRenderer2_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame(); 
-        if (show_demo_window) {
-            ImGui::ShowDemoWindow(&show_demo_window);
-        }               
+
+        render_login_window();
+
         ImGui::Render();
-        render();        
+        render();
     }    
 }
 
@@ -361,4 +362,40 @@ void App::push_quit(void) {
     SDL_Event e;
     e.type = SDL_QUIT;
     SDL_PushEvent(&e);
+}
+
+//-----------------------------------------------------------------------------
+void App::render_login_window(void) {
+
+    if(!show_login_window) return;  
+
+    ImGui::Begin(
+        "Login", 
+        NULL, 
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove
+    );
+    const int LOGIN_W = 320;
+    const int LOGIN_H = 200;
+    ImGui::SetWindowPos(ImVec2(width/2-LOGIN_W/2, heigth/2-LOGIN_H/2));
+    ImGui::SetWindowSize(ImVec2(LOGIN_W, LOGIN_H));
+    static char username[128] = "";
+    static char password[128] = "";
+    static bool show_password = false;
+
+    ImGui::InputText("Username", username, IM_ARRAYSIZE(username));
+    ImGui::InputText("Password", password, IM_ARRAYSIZE(password), show_password ? ImGuiInputTextFlags_None : ImGuiInputTextFlags_Password);
+    
+    ImGui::Checkbox("Show Password", &show_password);
+    if (ImGui::Button("Login")) {
+        if (strcmp(username, "admin") == 0 && strcmp(password, "password") == 0) {
+            ImGui::Text("Login successful!");
+            show_login_window = false;
+        } else {
+            ImGui::Text(username);
+        }
+    }
+    ImGui::Text(username);
+    ImGui::Text("Crie sua conta em miliogo.com");
+    ImGui::Text("É grátis :-)");
+    ImGui::End();
 }

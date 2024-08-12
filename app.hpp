@@ -74,7 +74,10 @@ private:
     Animates animates;
 private:
     void render_renders(void);    
-    void render(void);    
+    void render(void);
+private: // IMGUI
+    bool show_login_window;
+    void render_login_window(void);
 };
 
 #endif
