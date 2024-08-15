@@ -2,10 +2,16 @@
 #include "exception.hpp"
 #include <iostream>
 #include <algorithm>
+#include <fstream> 
+#include <iostream>
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
+
+#include <curl/curl.h>
+
+string App::save_path = "";
 
 //-----------------------------------------------------------------------------
 App::App(const string& window_caption, int width, int heigth) {
@@ -14,7 +20,16 @@ App::App(const string& window_caption, int width, int heigth) {
     this->width = width;
     this->heigth = heigth;
     animate_stack = 0;
-    show_login_window = true;
+    show_login_window = false;
+    login_wait = false;
+    login_status_msg = "";
+    login_hash = "";
+    load_login_hash();
+    if(!check_login()) {
+        login_hash = ""; 
+        show_login_window = true;
+        login_status_msg = "necessário fazer login";
+    }
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
         throw Exception("SDL não inicializou", SDL_GetError());            
     } 
@@ -36,6 +51,7 @@ App::App(const string& window_caption, int width, int heigth) {
     if(TTF_Init() == -1) {
         throw Exception("SDL_ttf não inicializou", TTF_GetError());
     }    
+
     window_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if(!window_renderer) {
         throw Exception("Não foi possível criar o renderizador da janela", SDL_GetError());
@@ -47,10 +63,11 @@ App::App(const string& window_caption, int width, int heigth) {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.IniFilename = NULL; // onde grava o arquivo imgui.ini
+    static string save_file = App::save_path + "imgui.ini";
+    io.IniFilename = save_file.c_str();
     ImGui::StyleColorsDark();
     ImGui_ImplSDL2_InitForSDLRenderer(window, window_renderer);
-    ImGui_ImplSDLRenderer2_Init(window_renderer);
+    ImGui_ImplSDLRenderer2_Init(window_renderer); 
 
 }
 
@@ -100,6 +117,9 @@ void App::loop(void) {
 
 //-----------------------------------------------------------------------------
 void App::poll_event(SDL_Event *e) {
+
+    if(show_login_window) return;
+
     switch(e->type) {
         case SDL_MOUSEMOTION: {            
             Render *r = get_render_at(e->motion.x, e->motion.y);            
@@ -346,7 +366,7 @@ void App::add_animate(Card *card, int x, int y) {
     animate.orig_y = rect.y;
     animate.dest_x = x;
     animate.dest_y = y;
-    animates.push_back(animate);
+    animates.push_back(animate); 
 }
 
 //-----------------------------------------------------------------------------
@@ -365,6 +385,13 @@ void App::push_quit(void) {
 }
 
 //-----------------------------------------------------------------------------
+size_t App::curl_write_callback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+    ((std::string*)userp)->append((char*)contents, size * nmemb);
+    return size * nmemb;
+}
+
+//-----------------------------------------------------------------------------
 void App::render_login_window(void) {
 
     if(!show_login_window) return;  
@@ -374,28 +401,160 @@ void App::render_login_window(void) {
         NULL, 
         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove
     );
-    const int LOGIN_W = 320;
-    const int LOGIN_H = 200;
+    const int LOGIN_W = 480;
+    const int LOGIN_H = 320;
     ImGui::SetWindowPos(ImVec2(width/2-LOGIN_W/2, heigth/2-LOGIN_H/2));
     ImGui::SetWindowSize(ImVec2(LOGIN_W, LOGIN_H));
-    static char username[128] = "";
-    static char password[128] = "";
     static bool show_password = false;
+    static bool login_progress = false;
+    
+
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), login_status_msg.c_str());
 
     ImGui::InputText("Username", username, IM_ARRAYSIZE(username));
     ImGui::InputText("Password", password, IM_ARRAYSIZE(password), show_password ? ImGuiInputTextFlags_None : ImGuiInputTextFlags_Password);
     
     ImGui::Checkbox("Show Password", &show_password);
-    if (ImGui::Button("Login")) {
-        if (strcmp(username, "admin") == 0 && strcmp(password, "password") == 0) {
-            ImGui::Text("Login successful!");
-            show_login_window = false;
-        } else {
-            ImGui::Text(username);
+    if(login_progress || login_wait) {
+        ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(0.0f, 0.0f), "Login, please wait..");        
+    } else {
+        if (ImGui::Button("Login")) {
+            if (strcmp(username, "") == 0 && strcmp(password, "") == 0) {
+                login_status_msg = "login como usuário anônimo";
+                login_hash = "";
+                SDL_CreateThread(
+                    [](void *obj) {
+                        App *app = (App*)obj;
+                        SDL_Delay(3000);
+                        app->show_login_window = false;
+                        return 0;
+                    }, NULL, (void*)this
+                );                  
+            } else {
+                login_progress = true;
+                login_status_msg = "login em processo, aguarde...";
+                login_hash = "";
+                auto login_function = [](void *obj) {
+                    App *app = (App*)obj;
+                    CURL *curl = curl_easy_init();
+                    if(curl) {
+                        string u("u: ");
+                        u.append(app->username);
+                        string p("p: ");
+                        p.append(app->password);
+                        struct curl_slist *slist = NULL;
+                        slist = curl_slist_append(slist, u.c_str());
+                        slist = curl_slist_append(slist, p.c_str());                        
+                        CURLcode res;
+                        string response_buffer;
+                        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+                        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/miliogo/login.php");
+                        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, App::curl_write_callback);
+                        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
+                        res = curl_easy_perform(curl);
+                        switch(res) {
+                            case CURLE_OK:
+                                long response_code;
+                                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+                                if(response_code == 201) {
+                                    app->login_status_msg = "login realizado com sucesso";
+                                    app->login_hash = response_buffer;
+                                    app->save_login_hash();
+                                    app->login_wait = true;
+                                    SDL_CreateThread(
+                                        [](void *obj) {
+                                            App *app = (App*)obj;
+                                            SDL_Delay(1500);
+                                            app->show_login_window = false;
+                                            app->login_wait = false;
+                                            return 0;
+                                        }, NULL, (void*)app
+                                    );                                    
+                                } else if(response_code == 200) {
+                                    app->login_status_msg = "servidor respondeu de modo inesperado";
+                                } else if(response_code == 401) {
+                                    app->login_status_msg = "usuário ou senha inválidos";
+                                } else if(response_code == 404) {
+                                    app->login_status_msg = "o endpoint não existe";
+                                } else if(response_code == 418) {
+                                    app->login_status_msg = "eu sou um bule de chá";
+                                } else {
+                                    app->login_status_msg = "servidor respondeu com erro desconhecido";
+                                }
+                                break;
+                            case CURLE_COULDNT_RESOLVE_HOST:
+                                app->login_status_msg = "host não resolvido, verifique sua internet";
+                                break;
+                            default:
+                                app->login_status_msg = "curl erro ";
+                                app->login_status_msg.append(to_string((int)res));
+                                app->login_status_msg.append(", verifique sua internet");
+                        }
+                        curl_easy_cleanup(curl);
+                        curl_slist_free_all(slist);
+                    }
+
+                    login_progress = false;
+                    return 0;
+                };    
+                SDL_CreateThread(login_function, NULL, (void*)this);
+            }
         }
     }
-    ImGui::Text(username);
+    ImGui::Text("");
     ImGui::Text("Crie sua conta em miliogo.com");
     ImGui::Text("É grátis :-)");
     ImGui::End();
+ 
+}
+
+//-----------------------------------------------------------------------------
+void App::save_login_hash(void) {
+    const string file = App::save_path + "login.dat";
+    ofstream f(file.c_str());
+    if(f.good()) {
+        f.write(login_hash.c_str(), login_hash.size());
+    }        
+}
+
+//-----------------------------------------------------------------------------
+void App::load_login_hash(void) {
+    const string file = App::save_path + "login.dat";
+    ifstream f(file.c_str());
+    if(f.good()) {
+        f >> login_hash;
+    } else {
+        login_hash = "";
+    }
+}
+
+//-----------------------------------------------------------------------------
+bool App::check_login(void) const {
+    bool result = false;
+    CURL *curl = curl_easy_init();
+    if(curl) {
+        string check("check: ");
+        check.append(login_hash);
+        struct curl_slist *slist = NULL;
+        slist = curl_slist_append(slist, check.c_str());                        
+        CURLcode res;
+        string response_buffer;
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/miliogo/login.php");
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, App::curl_write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
+        res = curl_easy_perform(curl);
+        switch(res) {
+            case CURLE_OK:
+                long response_code;
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+                if(response_code == 202) {
+                    result = true;
+                }
+                break;
+        }
+        curl_easy_cleanup(curl);
+        curl_slist_free_all(slist);
+    }
+    return result;
 }

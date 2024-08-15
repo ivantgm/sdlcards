@@ -5,6 +5,7 @@
 #include <vector>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+
 #include "render.hpp"
 #include "card.hpp"
 
@@ -23,8 +24,17 @@ public:
     App(const string& window_caption, int width, int heigth);
     ~App();
 public:        
-    Renders renders;
+    Renders renders;    
 public:
+    static string save_path;
+    string login_status_msg;
+    string login_hash;
+    bool show_login_window; 
+    bool login_wait;       
+    void save_login_hash(void);
+    void load_login_hash(void);
+    bool check_login(void) const; 
+    static size_t curl_write_callback(void *contents, size_t size, size_t nmemb, void *userp);
     SDL_Renderer* get_window_renderer(void);
     void loop(void);
     virtual void poll_event(SDL_Event *e);
@@ -33,13 +43,15 @@ public:
     int get_heigth(void);
     void release_last_render_at(const Render *render);
     void push_mouse_motion(void);
-    void push_quit(void);
+    void push_quit(void);    
 public:    
     void begin_animate(void);
     void end_animate(void);
     bool is_animate(void) const;
     void add_animate(Card *card, int x, int y);
-protected:       
+protected: 
+    char username[128] = "";
+    char password[128] = "";
     Texture *add_texture(const string& file_name, int x, int y);
     Texture *add_texture_text(const string& ttf_file_name, const string& text,
             int x, int y, const SDL_Color &color, int font_size
@@ -76,7 +88,6 @@ private:
     void render_renders(void);    
     void render(void);
 private: // IMGUI
-    bool show_login_window;
     void render_login_window(void);
 };
 

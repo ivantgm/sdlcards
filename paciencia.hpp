@@ -15,7 +15,7 @@ class Paciencia: public App {
 public:
     Paciencia();
     ~Paciencia();
-    void poll_event(SDL_Event *e);
+    void poll_event(SDL_Event *e);    
 public:    
     Cols cols;
     vector<Spin*> spins_rand_seed;
@@ -31,7 +31,7 @@ private:
     const int ch = 150;
     const int dist = 12;
     const int ghost_alpha = 32;
-    string save_path, config_file;
+    string config_file;
     Baralho baralho;   
     CardGroup *casa_ouros;
     Card *casa_ouros_ghost;

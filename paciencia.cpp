@@ -1,13 +1,12 @@
 #include "paciencia.hpp"
 #include "exception.hpp"
 #include <algorithm>
-#include <fstream>
+#include <fstream> 
 
 //-----------------------------------------------------------------------------
 Paciencia::Paciencia() : App("Paciência 1.0", 910, 700) {
 
-    save_path = SDL_GetPrefPath("miliogo", "paciencia");
-    config_file = save_path + "config.dat";
+    config_file = App::save_path + "config.dat";
 
     ifstream f(config_file.c_str());
     if(f.good()) {
@@ -49,13 +48,28 @@ void Paciencia::menu(void) {
         paciencia->push_quit();
     };  
 
-    Render *btn_cancel = form->add_render(16, 0, create_paciencia_button("VOLTAR PRO JOGO", 640, 10, 96));    
+    Render *btn_cancel = form->add_render(16, 0, create_paciencia_button("VOLTAR PRO JOGO", 640, 10, 96));
     btn_cancel->on_mouse_click = [](Render *r) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
         paciencia->release_last_render_at(r);
         paciencia->delete_render(r->owner);
         paciencia->push_mouse_motion();
     }; 
+    
+    Render *btn_logoff = form->add_render(30, 13, create_paciencia_button("LOGOFF", 640, 10, 96));
+    btn_logoff->on_mouse_click = [](Render *r) {
+        Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
+        
+        paciencia->login_hash = "";
+        paciencia->show_login_window = true;
+        paciencia->login_status_msg = "logoff realizado";        
+        paciencia->save_login_hash();
+
+        paciencia->release_last_render_at(r);
+        paciencia->delete_render(r->owner);
+        paciencia->push_mouse_motion();
+    }; 
+
 
     form->add_render(5, 8, new Texture(this, FONTFILE, "Random Seed:", 0, 0, {127, 127, 127}, 48));
 
@@ -524,5 +538,4 @@ void PacienciaCard::before_select(bool &can_select) {
     }
     
 }
-
 
