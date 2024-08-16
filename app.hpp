@@ -39,7 +39,7 @@ public:
     void save_login_hash(void);
     void load_login_hash(void);
     bool check_login(void) const; 
-    void request(const string &url, const Headers &headers, RequestFunction func);    
+    void request(const string &url, const Headers &headers, const string &body, RequestFunction func);    
     string make_url(const string& endpoint) const;
     void show_alert(const string &msg);
     static size_t curl_write_callback(void *contents, size_t size, size_t nmemb, void *userp);

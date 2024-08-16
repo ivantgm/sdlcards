@@ -568,11 +568,11 @@ bool App::check_login(void) const {
 }
 
 //-----------------------------------------------------------------------------
-void App::request(const string &endpoint, const Headers &headers, RequestFunction func) {
+void App::request(const string &endpoint, const Headers &headers, const string &body, RequestFunction func) {
     typedef struct { 
         App *app;
         RequestFunction func;
-        string endpoint;
+        string endpoint, body;
         Headers headers;
     } Obj;
     Obj *obj = new Obj();
@@ -580,11 +580,13 @@ void App::request(const string &endpoint, const Headers &headers, RequestFunctio
     obj->func = func;
     obj->headers = headers;
     obj->endpoint = endpoint;
+    obj->body = body;
     auto request_function = [](void *obj) {
         App *app = ((Obj*)obj)->app;
         RequestFunction func = ((Obj*)obj)->func;
         const string& endpoint = ((Obj*)obj)->endpoint;
         const Headers& headers = ((Obj*)obj)->headers;
+        const string& body = ((Obj*)obj)->body;
         CURL *curl = curl_easy_init();
         if(curl) {
             struct curl_slist *slist = NULL;
@@ -598,6 +600,7 @@ void App::request(const string &endpoint, const Headers &headers, RequestFunctio
             curl_easy_setopt(curl, CURLOPT_URL, app->make_url(endpoint).c_str());
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, App::curl_write_callback);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
             res = curl_easy_perform(curl);
             switch(res) {
                 case CURLE_OK:

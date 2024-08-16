@@ -172,25 +172,7 @@ void Paciencia::new_game(void) {
 
     delete_renders();
 
-    if(login_hash != "") {
-        const string TIPO_NEW_GAME = "1";
-        const string GAME_PACIENCIA = "1";
-        Headers headers;
-        headers["hash"] = login_hash;
-        headers["seed"] = to_string(save_data.seed);
-        headers["dificult"] = to_string(save_data.dificult);
-        headers["tipo"] = TIPO_NEW_GAME;
-        headers["game"] = GAME_PACIENCIA;
-        request("game.php", headers, 
-            [](App *app, long response_code, string response) {
-                if(response_code!=201) {
-                    string msg("falha ao acessar servidor: ");
-                    msg.append(to_string(response_code));
-                    app->show_alert(msg);
-                }
-            }
-        );
-    }
+    send_new_game();
 
     Texture *button = add_paciencia_button("MENU", 640, 10, 120);
     button->on_mouse_click = [](Render *r) {
@@ -454,6 +436,43 @@ CardGroup *Paciencia::create_col(int col) {
     }    
     cols.push_back(group);
     return group;   
+}
+
+//-----------------------------------------------------------------------------
+string Paciencia::baralho_str(void) const {
+    string result("[");
+    for(size_t i = 0; i < baralho.size(); i++) {
+        result.append(to_string(baralho[i]));
+        if(i < baralho.size()-1) {
+            result.append(",");
+        }
+    }
+    result.append("]");
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+void Paciencia::send_new_game(void) {
+    if(login_hash != "") {
+        const string TIPO_NEW_GAME = "1";
+        const string GAME_PACIENCIA = "1";
+        Headers headers;
+        headers["hash"] = login_hash;
+        headers["seed"] = to_string(save_data.seed);
+        headers["dificult"] = to_string(save_data.dificult);
+        headers["tipo"] = TIPO_NEW_GAME;
+        headers["game"] = GAME_PACIENCIA;
+        string body = baralho_str();
+        request("game.php", headers, body, 
+            [](App *app, long response_code, string response) {
+                if(response_code!=201) {
+                    string msg("falha ao acessar servidor: ");
+                    msg.append(to_string(response_code));
+                    app->show_alert(msg);
+                } 
+            }
+        );
+    }    
 }
 
 //-----------------------------------------------------------------------------

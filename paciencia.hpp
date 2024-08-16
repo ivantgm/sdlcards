@@ -25,7 +25,9 @@ public:
     int pop_baralho(void);
     void new_game(void);
     void menu(void);
-    void delete_render(const Render *render);    
+    void delete_render(const Render *render); 
+    string baralho_str(void) const;
+    void send_new_game(void);
 private:
     const int cw = 100;
     const int ch = 150;
