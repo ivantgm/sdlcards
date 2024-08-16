@@ -28,7 +28,7 @@ App::App(const string& window_caption, int width, int heigth) {
     alert_message = "";
     login_hash = "";    
     load_login_hash();
-    if(!check_login()) {
+    if((login_hash=="")||(!check_login())) {
         login_hash = ""; 
         show_login_window = true;
         login_status_msg = "necessário fazer login";
@@ -409,6 +409,7 @@ void App::render_login_window(void) {
     const int LOGIN_H = 320;
     ImGui::SetWindowPos(ImVec2(width/2-LOGIN_W/2, heigth/2-LOGIN_H/2));
     ImGui::SetWindowSize(ImVec2(LOGIN_W, LOGIN_H));
+    ImGui::GetStyle().Alpha = 1;
     static bool show_password = false;
     static bool login_progress = false;
     
