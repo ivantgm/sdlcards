@@ -18,6 +18,8 @@ public:
 };
 
 typedef vector<Animate> Animates;
+typedef map<string, string> Headers;
+typedef void (*RequestFunction)(App*, long, string);
 
 class App {
 public:
@@ -27,13 +29,19 @@ public:
     Renders renders;    
 public:
     static string save_path;
+    static string url;
     string login_status_msg;
     string login_hash;
     bool show_login_window; 
-    bool login_wait;       
+    bool login_wait;
+    bool show_alert_window;
+    string alert_message;
     void save_login_hash(void);
     void load_login_hash(void);
     bool check_login(void) const; 
+    void request(const string &url, const Headers &headers, RequestFunction func);    
+    string make_url(const string& endpoint) const;
+    void show_alert(const string &msg);
     static size_t curl_write_callback(void *contents, size_t size, size_t nmemb, void *userp);
     SDL_Renderer* get_window_renderer(void);
     void loop(void);
@@ -89,6 +97,7 @@ private:
     void render(void);
 private: // IMGUI
     void render_login_window(void);
+    void render_alert_window(void);
 };
 
 #endif

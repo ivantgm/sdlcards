@@ -12,6 +12,7 @@
 #include <curl/curl.h>
 
 string App::save_path = "";
+string App::url = "http://localhost/miliogo";
 
 //-----------------------------------------------------------------------------
 App::App(const string& window_caption, int width, int heigth) {
@@ -21,9 +22,11 @@ App::App(const string& window_caption, int width, int heigth) {
     this->heigth = heigth;
     animate_stack = 0;
     show_login_window = false;
+    show_alert_window = false;
     login_wait = false;
     login_status_msg = "";
-    login_hash = "";
+    alert_message = "";
+    login_hash = "";    
     load_login_hash();
     if(!check_login()) {
         login_hash = ""; 
@@ -109,6 +112,7 @@ void App::loop(void) {
         ImGui::NewFrame(); 
 
         render_login_window();
+        render_alert_window();
 
         ImGui::Render();
         render();
@@ -448,7 +452,7 @@ void App::render_login_window(void) {
                         CURLcode res;
                         string response_buffer;
                         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
-                        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/miliogo/login.php");
+                        curl_easy_setopt(curl, CURLOPT_URL, app->make_url("login.php").c_str());
                         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, App::curl_write_callback);
                         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
                         res = curl_easy_perform(curl);
@@ -530,6 +534,9 @@ void App::load_login_hash(void) {
 
 //-----------------------------------------------------------------------------
 bool App::check_login(void) const {
+    /*
+    // request sincrono!
+    */
     bool result = false;
     CURL *curl = curl_easy_init();
     if(curl) {
@@ -540,7 +547,7 @@ bool App::check_login(void) const {
         CURLcode res;
         string response_buffer;
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
-        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/miliogo/login.php");
+        curl_easy_setopt(curl, CURLOPT_URL, make_url("login.php").c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, App::curl_write_callback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
         res = curl_easy_perform(curl);
@@ -557,4 +564,91 @@ bool App::check_login(void) const {
         curl_slist_free_all(slist);
     }
     return result;
+}
+
+//-----------------------------------------------------------------------------
+void App::request(const string &endpoint, const Headers &headers, RequestFunction func) {
+    typedef struct { 
+        App *app;
+        RequestFunction func;
+        string endpoint;
+        Headers headers;
+    } Obj;
+    Obj *obj = new Obj();
+    obj->app = this;
+    obj->func = func;
+    obj->headers = headers;
+    obj->endpoint = endpoint;
+    auto request_function = [](void *obj) {
+        App *app = ((Obj*)obj)->app;
+        RequestFunction func = ((Obj*)obj)->func;
+        const string& endpoint = ((Obj*)obj)->endpoint;
+        const Headers& headers = ((Obj*)obj)->headers;
+        CURL *curl = curl_easy_init();
+        if(curl) {
+            struct curl_slist *slist = NULL;
+            for (auto i : headers) {                
+                string header(i.first + ": " + i.second);
+                slist = curl_slist_append(slist, header.c_str());
+            }
+            CURLcode res;
+            string response_buffer;
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+            curl_easy_setopt(curl, CURLOPT_URL, app->make_url(endpoint).c_str());
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, App::curl_write_callback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
+            res = curl_easy_perform(curl);
+            switch(res) {
+                case CURLE_OK:
+                    long response_code;
+                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+                    func(app, response_code, response_buffer);
+                    break;
+                default:
+                    func(app, (int)res, response_buffer);
+            }
+            curl_easy_cleanup(curl);
+            curl_slist_free_all(slist);
+        }
+        delete ((Obj*)obj);
+        return 0;
+    };
+    SDL_CreateThread(request_function, NULL, (void*)obj);
+}
+
+//-----------------------------------------------------------------------------
+string App::make_url(const string& endpoint) const {
+    return string(App::url + "/" + endpoint);
+}
+
+//-----------------------------------------------------------------------------
+void App::show_alert(const string &msg) {
+    alert_message = msg;
+    SDL_CreateThread(
+        [](void *obj) {
+            App *app = (App*)obj;            
+            app->show_alert_window = true;
+            SDL_Delay(3000);
+            app->show_alert_window = false;
+            return 0;
+        }, NULL, (void*)this
+    );      
+}
+
+//-----------------------------------------------------------------------------
+void App::render_alert_window(void) {
+    if(!show_alert_window) return;
+
+    ImGui::Begin(
+        "Alerta", 
+        NULL, 
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove
+    );
+    const int LOGIN_W = 480;
+    const int LOGIN_H = 320;
+    ImGui::SetWindowPos(ImVec2(width/2-LOGIN_W/2, heigth/2-LOGIN_H/2));
+    ImGui::SetWindowSize(ImVec2(LOGIN_W, LOGIN_H));
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), alert_message.c_str());
+    ImGui::End();
+
 }

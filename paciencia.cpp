@@ -172,6 +172,24 @@ void Paciencia::new_game(void) {
 
     delete_renders();
 
+    const string TIPO_NEW_GAME = "1";
+    const string GAME_PACIENCIA = "1";
+    Headers headers;
+    headers["hash"] = login_hash;
+    headers["seed"] = to_string(save_data.seed);
+    headers["dificult"] = to_string(save_data.dificult);
+    headers["tipo"] = TIPO_NEW_GAME;
+    headers["game"] = GAME_PACIENCIA;
+    request("game.php", headers, 
+        [](App *app, long response_code, string response) {
+            if(response_code!=201) {
+                string msg("falha ao acessar servidor: ");
+                msg.append(to_string(response_code));
+                app->show_alert(msg);
+            }
+        }
+    );
+
     Texture *button = add_paciencia_button("MENU", 640, 10, 120);
     button->on_mouse_click = [](Render *r) {
         Paciencia *paciencia = dynamic_cast<Paciencia*>(r->app);
