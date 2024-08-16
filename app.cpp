@@ -629,7 +629,12 @@ void App::show_alert(const string &msg) {
             App *app = (App*)obj;            
             app->show_alert_window = true;
             SDL_Delay(3000);
+            for(int i = 0; i < 100; i++) {
+                ImGui::GetStyle().Alpha -= 0.009;
+                SDL_Delay(5);
+            }            
             app->show_alert_window = false;
+            ImGui::GetStyle().Alpha = 1;
             return 0;
         }, NULL, (void*)this
     );      
