@@ -15,7 +15,7 @@ add_executable(SDLCards
                 imgui/imgui_widgets.cpp
                 imgui/imgui.cpp
                 imgui/backends/imgui_impl_sdl2.cpp
-                imgui/backends/imgui_impl_sdlrenderer2.cpp
-               )
-target_link_libraries(SDLCards SDL2 SDL2_image SDL2_ttf)
+                imgui/backends/imgui_impl_sdlrenderer2.cpp 
+               ) 
+target_link_libraries(SDLCards SDL2 SDL2_image SDL2_ttf curl)
 target_include_directories(SDLCards PRIVATE imgui imgui/backends /usr/include/SDL2)
