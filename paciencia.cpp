@@ -3,6 +3,12 @@
 #include <algorithm>
 #include <fstream> 
 
+const string GAME_PACIENCIA = "1";
+const string TIPO_NEW_GAME  = "1";
+const string TIPO_PEGAMONTE = "2";
+const string TIPO_MOVE      = "3";
+const string TIPO_TERMINOU  = "4";
+
 //-----------------------------------------------------------------------------
 Paciencia::Paciencia() : App("Paciência 1.0", 910, 700) {
 
@@ -206,6 +212,7 @@ void Paciencia::new_game(void) {
     casa_ouros_ghost->set_alpha(ghost_alpha);
     casa_ouros_ghost->set_enabled(false);
     casa_ouros_ghost->on_mouse_click = casa_ouros_click;
+    casa_ouros->name = "ouros";
 
     //====================
     void (*casa_espadas_click)(Render*) = [](Render *r) {
@@ -219,7 +226,8 @@ void Paciencia::new_game(void) {
     casa_espadas_ghost = casa_espadas->add_card(12);
     casa_espadas_ghost->set_alpha(ghost_alpha);
     casa_espadas_ghost->set_enabled(false);
-    casa_espadas_ghost->on_mouse_click = casa_espadas_click;    
+    casa_espadas_ghost->on_mouse_click = casa_espadas_click;
+    casa_espadas->name = "espadas";
 
 
     //====================
@@ -232,7 +240,8 @@ void Paciencia::new_game(void) {
     casa_copas_ghost = casa_copas->add_card(13);
     casa_copas_ghost->set_alpha(ghost_alpha);
     casa_copas_ghost->set_enabled(false);
-    casa_copas_ghost->on_mouse_click = casa_copas_click;    
+    casa_copas_ghost->on_mouse_click = casa_copas_click;
+    casa_copas->name = "copas";
 
     //====================
     void (*casa_paus_click)(Render*) = [](Render *r) {
@@ -245,6 +254,7 @@ void Paciencia::new_game(void) {
     casa_paus_ghost->set_alpha(ghost_alpha);
     casa_paus_ghost->set_enabled(false);
     casa_paus_ghost->on_mouse_click = casa_paus_click;
+    casa_paus->name = "paus";
 
 }
 
@@ -276,9 +286,9 @@ void Paciencia::pega_monte(Render *r) {
         } 
         if(!baralho.size()) {
             monte->set_alpha(ghost_alpha);
-        }
-        
+        }        
     }
+    send_pega_monte();
 }
 
 //-----------------------------------------------------------------------------
@@ -316,25 +326,27 @@ void Paciencia::casa_click(Naipe naipe) {
     
     for(auto col : cols) {
         Cards selecteds = col->get_selecteds();
-        bool mover = false;
-        // todo - nao precisava ser for, pois testa somente a ultima carta, analisar
-        for(Cards::reverse_iterator i = selecteds.rbegin(); i != selecteds.rend(); i++) {
-            Card *card = (*i);
-            int id = card->get_card_id();
-            if(!((card->naipe(naipe)) && ((id/10) == casa->get_cards().size()))) {
-                return;
-            } else {
-                break;
-            }
-        }
-        for(auto card : selecteds) {
-            card->set_selected(false);
-            card->on_mouse_click = casa_ghost->on_mouse_click;
-        }
-
-        col->move_cards(selecteds, casa, -1, true);
-        
         if(!selecteds.empty()) {
+
+            bool mover = false;
+            // todo - nao precisava ser for, pois testa somente a ultima carta, analisar
+            for(Cards::reverse_iterator i = selecteds.rbegin(); i != selecteds.rend(); i++) {
+                Card *card = (*i);
+                int id = card->get_card_id();
+                if(!((card->naipe(naipe)) && ((id/10) == casa->get_cards().size()))) {
+                    return;
+                } else {
+                    break;
+                }
+            }
+            for(auto card : selecteds) {
+                card->set_selected(false);
+                card->on_mouse_click = casa_ghost->on_mouse_click;
+            }
+
+            col->move_cards(selecteds, casa, -1, true);
+            send_move(col, selecteds, casa);
+
             Cards cards = col->get_cards();
             if(!cards.empty()) {
                 Card *c = *cards.rbegin();
@@ -344,6 +356,16 @@ void Paciencia::casa_click(Naipe naipe) {
                 }
             }
         }
+    }
+    bool terminou = true;
+    for(auto col : cols) {
+        if(!col->get_cards().empty()) {
+            terminou = false;
+            break;
+        }
+    }
+    if(terminou) {
+        send_terminou();
     }
 }
 
@@ -411,6 +433,7 @@ CardGroup *Paciencia::create_col(int col) {
     CardGroup *group = add_card_group(Vertical); 
     empty_ghost->link = group;   
     group->set_xy(calc_col_x(col), calc_row_y(2)); 
+    group->name = string("Col") + to_string(col);
 
     const int FACIL = 0;
     const int DIFICIL = 2;
@@ -452,10 +475,21 @@ string Paciencia::baralho_str(void) const {
 }
 
 //-----------------------------------------------------------------------------
+string Paciencia::cards_to_string(const Cards &cards) const {
+    string result("[");
+    for(size_t i = 0; i < cards.size(); i++) {
+        result.append(to_string(cards[i]->get_card_id()));
+        if(i < cards.size()-1) {
+            result.append(",");
+        }
+    }
+    result.append("]");
+    return result;
+}
+
+//-----------------------------------------------------------------------------
 void Paciencia::send_new_game(void) {
     if(login_hash != "") {
-        const string TIPO_NEW_GAME = "1";
-        const string GAME_PACIENCIA = "1";
         Headers headers;
         headers["hash"] = login_hash;
         headers["seed"] = to_string(save_data.seed);
@@ -473,6 +507,70 @@ void Paciencia::send_new_game(void) {
             }
         );
     }    
+}
+
+//-----------------------------------------------------------------------------
+void Paciencia::send_pega_monte(void) {
+    if(login_hash != "") {
+        Headers headers;
+        headers["hash"] = login_hash;
+        headers["seed"] = to_string(save_data.seed);
+        headers["dificult"] = to_string(save_data.dificult);
+        headers["tipo"] = TIPO_PEGAMONTE;
+        headers["game"] = GAME_PACIENCIA;
+        request("game.php", headers, "", 
+            [](App *app, long response_code, string response) {
+                if(response_code!=201) {
+                    string msg("falha ao acessar servidor: ");
+                    msg.append(to_string(response_code));
+                    app->show_alert(msg);
+                } 
+            }
+        );
+    }      
+}
+
+//-----------------------------------------------------------------------------
+void Paciencia::send_move(const CardGroup *source, const Cards &selecteds, const CardGroup *dest) {
+    if(login_hash != "") {
+        Headers headers;
+        headers["hash"] = login_hash;
+        headers["seed"] = to_string(save_data.seed);
+        headers["dificult"] = to_string(save_data.dificult);
+        headers["tipo"] = TIPO_MOVE;
+        headers["game"] = GAME_PACIENCIA;
+        string body = source->name + "," + dest->name + ":" + cards_to_string(selecteds);
+        request("game.php", headers, body, 
+            [](App *app, long response_code, string response) {
+                if(response_code!=201) {
+                    string msg("falha ao acessar servidor: ");
+                    msg.append(to_string(response_code));
+                    app->show_alert(msg);
+                } 
+            }
+        );
+    }    
+}
+
+//-----------------------------------------------------------------------------
+void Paciencia::send_terminou(void) {
+    if(login_hash != "") {
+        Headers headers;
+        headers["hash"] = login_hash;
+        headers["seed"] = to_string(save_data.seed);
+        headers["dificult"] = to_string(save_data.dificult);
+        headers["tipo"] = TIPO_TERMINOU;
+        headers["game"] = GAME_PACIENCIA;
+        request("game.php", headers, "", 
+            [](App *app, long response_code, string response) {
+                if(response_code!=201) {
+                    string msg("falha ao acessar servidor: ");
+                    msg.append(to_string(response_code));
+                    app->show_alert(msg);
+                } 
+            }
+        );
+    }      
 }
 
 //-----------------------------------------------------------------------------
@@ -547,6 +645,8 @@ void PacienciaCard::before_select(bool &can_select) {
                     if(card->seq()+1 == seq()) {
 
                         col->move_cards(selecteds, this_group, -1, false);
+                        paciencia->send_move(col, selecteds, this_group);
+
                         for(auto card : selecteds) {
                             card->set_selected(false);
                         }

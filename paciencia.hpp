@@ -27,7 +27,11 @@ public:
     void menu(void);
     void delete_render(const Render *render); 
     string baralho_str(void) const;
+    string cards_to_string(const Cards &cards) const;
     void send_new_game(void);
+    void send_pega_monte(void);
+    void send_move(const CardGroup *source, const Cards &selecteds, const CardGroup *dest);
+    void send_terminou(void);
 private:
     const int cw = 100;
     const int ch = 150;

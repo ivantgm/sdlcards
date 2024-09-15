@@ -26,6 +26,7 @@ Render::Render(App *app) {
     owner = nullptr;
     link = nullptr;
     this->app = app;
+    name = "";
 }
 
 //-----------------------------------------------------------------------------

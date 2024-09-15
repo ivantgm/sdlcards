@@ -31,6 +31,7 @@ public:
     Render *owner;
     Render *link;
     SDL_Color color;
+    string name;
     virtual void render(void) = 0;
     virtual void set_x(int x) = 0;
     virtual void set_y(int y) = 0;
